@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "124224713822",
+    "project_id": "aura3-74015",
+    "storage_bucket": "aura3-74015.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:124224713822:android:c7e69df0f16e3cc311b0cf",
+        "android_client_info": {
+          "package_name": "com.example.aura3"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "124224713822-b40pn7nfr69fbnjhr44udjglgdf21ng5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.aura3",
+            "certificate_hash": "f18791b110ce15e4a254b7e0a29e74b2d183ddd2"
+          }
+        },
+        {
+          "client_id": "124224713822-mb5ndfabqqraetb0pv90gg2a8fq9g5mb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-0h0XeA2RnQbKH1L6PXu-byDynq_cafo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "124224713822-mb5ndfabqqraetb0pv90gg2a8fq9g5mb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "124224713822-1covvr289hv9i8btarme6n7a1lqio4ju.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.aura3"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
