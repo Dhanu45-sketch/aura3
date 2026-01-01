@@ -16,6 +16,7 @@ import 'features/library/screens/library_screen.dart';
 import 'features/meditation/screens/meditation_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
 import 'core/widgets/glass_container.dart';
+import 'features/meditation/providers/meditation_provider.dart';
 import 'core/theme/app_colors.dart';
 import 'dart:ui';
 
@@ -53,6 +54,7 @@ class Aura3App extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => PreferencesProvider()),
         ChangeNotifierProvider(create: (_) => SoundProvider()), // Added SoundProvider
+        ChangeNotifierProvider(create: (_) => MeditationProvider()),
       ],
       child: Consumer<PreferencesProvider>(
         builder: (context, prefsProvider, _) {

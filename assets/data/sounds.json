@@ -1,0 +1,132 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-02T10:00:00Z",
+  "sounds": [
+    {
+      "id": "earth_001",
+      "title": "Bangkok Rain",
+      "element": "earth",
+      "description": "Gentle rain sounds from Bangkok, perfect for relaxation and sleep",
+      "durationSeconds": 180,
+      "firebaseStoragePath": "sounds/earth/322965__kijjaz__20150925-bangkok-rain-01.wav",
+      "thumbnailUrl": "",
+      "tags": ["rain", "nature", "sleep", "relaxation"],
+      "isPremium": false,
+      "fileSize": "5.2 MB",
+      "format": "WAV"
+    },
+    {
+      "id": "earth_002",
+      "title": "Berland River",
+      "element": "earth",
+      "description": "Flowing river sounds for meditation and focus",
+      "durationSeconds": 210,
+      "firebaseStoragePath": "sounds/earth/634810__robertcrosley__berland-river-210818-t010.wav",
+      "thumbnailUrl": "",
+      "tags": ["river", "water", "nature", "focus"],
+      "isPremium": false,
+      "fileSize": "6.8 MB",
+      "format": "WAV"
+    },
+    {
+      "id": "fire_001",
+      "title": "Cozy Fireplace",
+      "element": "fire",
+      "description": "Crackling fireplace sounds for warmth and comfort",
+      "durationSeconds": 240,
+      "firebaseStoragePath": "sounds/fire/81801__silencyo__silencyo_cc_fire-in-fireplace_close-up_reverberant2.aiff",
+      "thumbnailUrl": "",
+      "tags": ["fireplace", "cozy", "winter", "warmth"],
+      "isPremium": false,
+      "fileSize": "7.5 MB",
+      "format": "AIFF"
+    },
+    {
+      "id": "water_001",
+      "title": "Ocean Waves",
+      "element": "water",
+      "description": "Calming ocean waves for deep relaxation",
+      "durationSeconds": 200,
+      "firebaseStoragePath": "sounds/water/161700__xserra__ocean-3.wav",
+      "thumbnailUrl": "",
+      "tags": ["ocean", "waves", "beach", "sleep"],
+      "isPremium": false,
+      "fileSize": "6.2 MB",
+      "format": "WAV"
+    },
+    {
+      "id": "water_002",
+      "title": "Ocean Coast Morning",
+      "element": "water",
+      "description": "Peaceful morning ocean coast ambience",
+      "durationSeconds": 195,
+      "firebaseStoragePath": "sounds/water/827530__yevgverh__ocean_coast_04_092025_0659am.wav",
+      "thumbnailUrl": "",
+      "tags": ["ocean", "morning", "peaceful", "meditation"],
+      "isPremium": false,
+      "fileSize": "6.0 MB",
+      "format": "WAV"
+    },
+    {
+      "id": "wind_001",
+      "title": "Windchimes & Rain",
+      "element": "wind",
+      "description": "Soothing windchimes with gentle rain backdrop",
+      "durationSeconds": 220,
+      "firebaseStoragePath": "sounds/wind/261338__alphabetdust__windchimes-and-rain.wav",
+      "thumbnailUrl": "",
+      "tags": ["windchimes", "rain", "peaceful", "zen"],
+      "isPremium": false,
+      "fileSize": "7.0 MB",
+      "format": "WAV"
+    },
+    {
+      "id": "wind_002",
+      "title": "Gentle Windchime",
+      "element": "wind",
+      "description": "Pure windchime sounds for meditation and peace",
+      "durationSeconds": 150,
+      "firebaseStoragePath": "sounds/wind/376647__scogs_0451__windchime1.mp3",
+      "thumbnailUrl": "",
+      "tags": ["windchimes", "meditation", "zen", "calm"],
+      "isPremium": false,
+      "fileSize": "3.5 MB",
+      "format": "MP3"
+    },
+    {
+      "id": "wind_003",
+      "title": "Mystical Wind Whistles",
+      "element": "wind",
+      "description": "Ethereal wind whistles for deep meditation",
+      "durationSeconds": 180,
+      "firebaseStoragePath": "sounds/wind/538204__siriusparsec__shroud-wind-wistles.wav",
+      "thumbnailUrl": "",
+      "tags": ["wind", "mystical", "meditation", "ambient"],
+      "isPremium": false,
+      "fileSize": "5.8 MB",
+      "format": "WAV"
+    }
+  ],
+  "categories": [
+    {
+      "id": "sleep",
+      "name": "Sleep & Relaxation",
+      "soundIds": ["earth_001", "water_001", "water_002"]
+    },
+    {
+      "id": "meditation",
+      "name": "Deep Meditation",
+      "soundIds": ["wind_002", "wind_003", "earth_002"]
+    },
+    {
+      "id": "focus",
+      "name": "Focus & Productivity",
+      "soundIds": ["earth_002", "fire_001", "wind_001"]
+    },
+    {
+      "id": "nature",
+      "name": "Pure Nature",
+      "soundIds": ["earth_001", "earth_002", "water_001", "water_002", "wind_001"]
+    }
+  ]
+}

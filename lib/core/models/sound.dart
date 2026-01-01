@@ -8,6 +8,9 @@ class Sound {
   final String? localAssetPath; // For bundled sounds
   final String thumbnailUrl;
   final bool isPremium;
+  final List<String> tags; // NEW: tags for categorization
+  final String? fileSize; // NEW: display file size
+  final String? format; // NEW: audio format (MP3, WAV, etc.)
 
   Sound({
     required this.id,
@@ -19,6 +22,9 @@ class Sound {
     this.localAssetPath,
     required this.thumbnailUrl,
     this.isPremium = false,
+    this.tags = const [],
+    this.fileSize,
+    this.format,
   });
 
   factory Sound.fromJson(Map<String, dynamic> json) {
@@ -32,6 +38,11 @@ class Sound {
       localAssetPath: json['localAssetPath'] as String?,
       thumbnailUrl: json['thumbnailUrl'] as String? ?? '',
       isPremium: json['isPremium'] as bool? ?? false,
+      tags: json['tags'] != null
+          ? List<String>.from(json['tags'] as List)
+          : [],
+      fileSize: json['fileSize'] as String?,
+      format: json['format'] as String?,
     );
   }
 
@@ -46,6 +57,9 @@ class Sound {
       'localAssetPath': localAssetPath,
       'thumbnailUrl': thumbnailUrl,
       'isPremium': isPremium,
+      'tags': tags,
+      'fileSize': fileSize,
+      'format': format,
     };
   }
 
@@ -70,6 +84,9 @@ class Sound {
     String? localAssetPath,
     String? thumbnailUrl,
     bool? isPremium,
+    List<String>? tags,
+    String? fileSize,
+    String? format,
   }) {
     return Sound(
       id: id ?? this.id,
@@ -81,6 +98,9 @@ class Sound {
       localAssetPath: localAssetPath ?? this.localAssetPath,
       thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
       isPremium: isPremium ?? this.isPremium,
+      tags: tags ?? this.tags,
+      fileSize: fileSize ?? this.fileSize,
+      format: format ?? this.format,
     );
   }
 }

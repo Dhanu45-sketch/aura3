@@ -43,15 +43,34 @@ dependencies:
   flutter_animate: ^4.5.0
   glassmorphism: ^3.0.0
 
+  # Network & Connectivity
+  http: ^1.2.0
+  connectivity_plus: ^5.0.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
 
-  # assets:
-  #   - assets/images/
-  #   - assets/sounds/
-  #   - assets/data/
+  assets:
+    - assets/data/sounds.json
+    - assets/data/meditation_programs.json
+    - assets/images/aura_logo.png
+    - assets/images/aura_logo (1).png
+    - assets/images/element_earth.png
+    - assets/images/element_fire.png
+    - assets/images/element_water.png
+    - assets/images/element_wind.png
+
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/aura_logo.png"
+
+  #adaptive_icon_background: "#0F172A"
+  #adaptive_icon_foreground: "assets/images/aura_logo.png"

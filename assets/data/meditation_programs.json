@@ -1,0 +1,220 @@
+{
+  "version": "1.0.0",
+  "programs": [
+    {
+      "id": "beginner_7day",
+      "title": "7-Day Calm Journey",
+      "description": "Perfect for beginners. Learn the basics of mindfulness meditation in just 7 days.",
+      "level": "beginner",
+      "totalDays": 7,
+      "imageUrl": "",
+      "sessions": [
+        {
+          "day": 1,
+          "title": "Introduction to Breath",
+          "instruction": "Find a comfortable seated position. Close your eyes and focus on your natural breath. Notice the sensation of air entering and leaving your nostrils. When your mind wanders, gently bring it back to your breath. Start with just 5 minutes.",
+          "recommendedSoundId": "water_001",
+          "durationSeconds": 300
+        },
+        {
+          "day": 2,
+          "title": "Body Awareness",
+          "instruction": "Sit comfortably and take three deep breaths. Starting from your toes, slowly scan your body upward. Notice any tension or sensations without judgment. If you find tension, breathe into that area and allow it to relax.",
+          "recommendedSoundId": "earth_002",
+          "durationSeconds": 420
+        },
+        {
+          "day": 3,
+          "title": "Counting Breaths",
+          "instruction": "Close your eyes and begin breathing naturally. Count each exhale from 1 to 10, then start again. If you lose count, simply return to 1. This practice helps anchor your wandering mind.",
+          "recommendedSoundId": "wind_002",
+          "durationSeconds": 480
+        },
+        {
+          "day": 4,
+          "title": "Observing Thoughts",
+          "instruction": "Sit quietly and observe your thoughts as they arise. Imagine them as clouds passing in the sky. Don't engage with them or judge them. Simply notice and let them drift away. Return focus to your breath.",
+          "recommendedSoundId": "water_002",
+          "durationSeconds": 540
+        },
+        {
+          "day": 5,
+          "title": "Loving-Kindness",
+          "instruction": "Begin by directing kind thoughts toward yourself: 'May I be happy, may I be healthy, may I be at peace.' Then extend these wishes to loved ones, acquaintances, and eventually all beings.",
+          "recommendedSoundId": "wind_001",
+          "durationSeconds": 600
+        },
+        {
+          "day": 6,
+          "title": "Present Moment",
+          "instruction": "Bring your full attention to this moment. Notice what you hear, feel, and sense right now. When thoughts about past or future arise, acknowledge them and return to now. This moment is all that exists.",
+          "recommendedSoundId": "earth_001",
+          "durationSeconds": 600
+        },
+        {
+          "day": 7,
+          "title": "Integration Practice",
+          "instruction": "Today, combine all you've learned. Begin with breath awareness, scan your body, observe thoughts without attachment, and rest in the present moment. You've completed your first week of meditation!",
+          "recommendedSoundId": "water_001",
+          "durationSeconds": 720
+        }
+      ]
+    },
+    {
+      "id": "sleep_5day",
+      "title": "5-Day Better Sleep",
+      "description": "Designed to help you unwind and prepare for restful sleep. Practice each session before bedtime.",
+      "level": "beginner",
+      "totalDays": 5,
+      "imageUrl": "",
+      "sessions": [
+        {
+          "day": 1,
+          "title": "Evening Wind Down",
+          "instruction": "Lie down comfortably. Take slow, deep breaths. With each exhale, imagine releasing the tension and stress of your day. Feel your body becoming heavier and more relaxed with each breath.",
+          "recommendedSoundId": "water_001",
+          "durationSeconds": 600
+        },
+        {
+          "day": 2,
+          "title": "Progressive Relaxation",
+          "instruction": "Starting with your toes, tense each muscle group for 5 seconds, then release. Move upward through your body: legs, abdomen, chest, arms, and face. Feel the deep relaxation that follows the release.",
+          "recommendedSoundId": "earth_001",
+          "durationSeconds": 720
+        },
+        {
+          "day": 3,
+          "title": "Gratitude Before Sleep",
+          "instruction": "Reflect on three things from today that you're grateful for. They can be simple: a warm meal, a kind word, a moment of peace. Let these positive thoughts be the last in your mind before sleep.",
+          "recommendedSoundId": "wind_001",
+          "durationSeconds": 480
+        },
+        {
+          "day": 4,
+          "title": "Body Scan for Sleep",
+          "instruction": "Lie still and bring attention to each body part, starting from your head. Notice each area becoming heavy and sinking into the bed. By the time you reach your toes, you'll be ready for deep sleep.",
+          "recommendedSoundId": "water_002",
+          "durationSeconds": 900
+        },
+        {
+          "day": 5,
+          "title": "Complete Rest",
+          "instruction": "Tonight, simply let go. There's nothing to do, nowhere to be. Your only job is to rest. Breathe naturally, let your body sink into comfort, and allow sleep to come naturally.",
+          "recommendedSoundId": "earth_002",
+          "durationSeconds": 600
+        }
+      ]
+    },
+    {
+      "id": "focus_10day",
+      "title": "10-Day Focus Boost",
+      "description": "Enhance your concentration and mental clarity with daily focus-building exercises.",
+      "level": "intermediate",
+      "totalDays": 10,
+      "imageUrl": "",
+      "sessions": [
+        {
+          "day": 1,
+          "title": "Single-Point Focus",
+          "instruction": "Choose a single point of focus: your breath, a candle flame, or a sound. Whenever your attention drifts, notice it without judgment and return to your focal point. This trains your attention muscle.",
+          "recommendedSoundId": "fire_001",
+          "durationSeconds": 600
+        },
+        {
+          "day": 2,
+          "title": "Counting Practice",
+          "instruction": "Count your breaths from 1 to 100. If you lose count, start over. This seems simple but requires sustained attention. Notice how your mind resists and practice bringing it back gently.",
+          "recommendedSoundId": "earth_002",
+          "durationSeconds": 720
+        },
+        {
+          "day": 3,
+          "title": "Sound Awareness",
+          "instruction": "Close your eyes and listen to all sounds around you. Near and far, loud and quiet. Don't label them, just hear them. This expands your awareness while maintaining focus.",
+          "recommendedSoundId": "wind_003",
+          "durationSeconds": 600
+        },
+        {
+          "day": 4,
+          "title": "Mental Noting",
+          "instruction": "As thoughts arise, mentally note them: 'thinking,' 'planning,' 'remembering.' This creates space between you and your thoughts, improving your ability to choose where to place attention.",
+          "recommendedSoundId": "water_001",
+          "durationSeconds": 720
+        },
+        {
+          "day": 5,
+          "title": "Breath Triangle",
+          "instruction": "Visualize a triangle. Breathe in for 4 counts (up one side), hold for 4 counts (across the top), breathe out for 4 counts (down the other side). This geometric focus sharpens concentration.",
+          "recommendedSoundId": "wind_002",
+          "durationSeconds": 600
+        },
+        {
+          "day": 6,
+          "title": "Rest Day Practice",
+          "instruction": "Today, practice open awareness without forcing focus. Let your attention be soft and spacious. Notice everything without clinging to anything. This balance prevents mental fatigue.",
+          "recommendedSoundId": "earth_001",
+          "durationSeconds": 480
+        },
+        {
+          "day": 7,
+          "title": "Mantra Focus",
+          "instruction": "Choose a simple word or phrase (like 'peace,' 'calm,' or 'here now'). Repeat it silently with each breath. When distractions arise, return to your mantra. This builds unwavering focus.",
+          "recommendedSoundId": "fire_001",
+          "durationSeconds": 900
+        },
+        {
+          "day": 8,
+          "title": "Visual Concentration",
+          "instruction": "With eyes slightly open, fix your gaze on a single point. Blink naturally but maintain your focus. After 5 minutes, close your eyes and hold the visual memory. This trains visual attention.",
+          "recommendedSoundId": "water_002",
+          "durationSeconds": 600
+        },
+        {
+          "day": 9,
+          "title": "Sensation Focus",
+          "instruction": "Focus solely on physical sensations: the feeling of breath in your nostrils, the touch of clothes on skin, the pressure of sitting. This grounds attention in direct experience.",
+          "recommendedSoundId": "earth_002",
+          "durationSeconds": 720
+        },
+        {
+          "day": 10,
+          "title": "Master Practice",
+          "instruction": "Today, combine all techniques. Start with breath focus, add counting, note distractions, return to your anchor point. You've built a strong foundation for sustained concentration.",
+          "recommendedSoundId": "wind_001",
+          "durationSeconds": 900
+        }
+      ]
+    },
+    {
+      "id": "stress_relief",
+      "title": "Stress Relief Express",
+      "description": "Quick 3-day program to release stress and find calm in challenging times.",
+      "level": "beginner",
+      "totalDays": 3,
+      "imageUrl": "",
+      "sessions": [
+        {
+          "day": 1,
+          "title": "Release Tension",
+          "instruction": "Identify where you hold stress in your body. With each exhale, imagine releasing that tension. Visualize it flowing out of your body like water, leaving you lighter and more relaxed.",
+          "recommendedSoundId": "water_001",
+          "durationSeconds": 480
+        },
+        {
+          "day": 2,
+          "title": "Grounding Practice",
+          "instruction": "Feel your connection to the earth beneath you. Imagine roots growing from your body into the ground, anchoring you. Let the earth absorb your stress while you absorb its stability and calm.",
+          "recommendedSoundId": "earth_001",
+          "durationSeconds": 600
+        },
+        {
+          "day": 3,
+          "title": "Peaceful Mind",
+          "instruction": "Imagine a peaceful place: a beach, forest, or mountain. Engage all your senses. What do you see, hear, smell, and feel? Rest in this peaceful visualization, letting stress melt away.",
+          "recommendedSoundId": "wind_001",
+          "durationSeconds": 720
+        }
+      ]
+    }
+  ]
+}

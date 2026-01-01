@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/sound.dart';
 
@@ -240,6 +241,88 @@ class StorageService {
     final prefs = await _instance;
     return await prefs.remove(_profilePictureKey);
   }
+
+  static const String _downloadedSoundsKey = 'downloaded_sounds';
+
+  // ========== DOWNLOADED SOUNDS ==========
+
+  Future<List<String>> getDownloadedSounds() async {
+    final prefs = await _instance;
+    return prefs.getStringList(_downloadedSoundsKey) ?? [];
+  }
+
+  Future<bool> setDownloadedSounds(List<String> soundIds) async {
+    final prefs = await _instance;
+    return await prefs.setStringList(_downloadedSoundsKey, soundIds);
+  }
+
+  Future<bool> addDownloadedSound(String soundId) async {
+    final prefs = await _instance;
+    final downloaded = await getDownloadedSounds();
+    if (!downloaded.contains(soundId)) {
+      downloaded.add(soundId);
+      return await prefs.setStringList(_downloadedSoundsKey, downloaded);
+    }
+    return false;
+  }
+
+  Future<bool> removeDownloadedSound(String soundId) async {
+    final prefs = await _instance;
+    final downloaded = await getDownloadedSounds();
+    downloaded.remove(soundId);
+    return await prefs.setStringList(_downloadedSoundsKey, downloaded);
+  }
+
+  Future<bool> isDownloaded(String soundId) async {
+    final downloaded = await getDownloadedSounds();
+    return downloaded.contains(soundId);
+  }
+
+  Future<bool> clearDownloadedSounds() async {
+    final prefs = await _instance;
+    return await prefs.remove(_downloadedSoundsKey);
+  }
+  static const String _meditationProgressKey = 'meditation_progress';
+
+  // ========== MEDITATION PROGRESS ==========
+
+  Future<Map<String, int>> getMeditationProgress() async {
+    final prefs = await _instance;
+    final progressJson = prefs.getString(_meditationProgressKey);
+
+    if (progressJson == null) return {};
+
+    try {
+      final decoded = json.decode(progressJson) as Map<String, dynamic>;
+      return decoded.map((key, value) => MapEntry(key, value as int));
+    } catch (e) {
+      debugPrint('Error decoding meditation progress: $e');
+      return {};
+    }
+  }
+
+  Future<bool> setMeditationProgress(Map<String, int> progress) async {
+    final prefs = await _instance;
+    final progressJson = json.encode(progress);
+    return await prefs.setString(_meditationProgressKey, progressJson);
+  }
+
+  Future<int> getProgramProgress(String programId) async {
+    final progress = await getMeditationProgress();
+    return progress[programId] ?? 0;
+  }
+
+  Future<bool> setProgramProgress(String programId, int day) async {
+    final progress = await getMeditationProgress();
+    progress[programId] = day;
+    return await setMeditationProgress(progress);
+  }
+
+  Future<bool> clearMeditationProgress() async {
+    final prefs = await _instance;
+    return await prefs.remove(_meditationProgressKey);
+  }
+
 
   // ========== CLEAR DATA ==========
 

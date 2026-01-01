@@ -1,4 +1,3 @@
-import 'package:aura3/features/sounds/providers/sound_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
@@ -6,9 +5,42 @@ import '../../../core/widgets/glass_container.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/models/sound.dart';
 import '../../player/screens/player_screen.dart';
+import '../../sounds/providers/sound_provider.dart';
+import '../../library/providers/favorites_provider.dart';
+import '../../../core/services/connectivity_service.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String? _expandedElement;
+  bool _isOnline = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnectivity();
+    _listenToConnectivity();
+  }
+
+  Future<void> _checkConnectivity() async {
+    final isOnline = await connectivityService.checkConnectivity();
+    if (mounted) {
+      setState(() => _isOnline = isOnline);
+    }
+  }
+
+  void _listenToConnectivity() {
+    connectivityService.connectivityStream.listen((isOnline) {
+      if (mounted) {
+        setState(() => _isOnline = isOnline);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,36 +59,125 @@ class HomeScreen extends StatelessWidget {
         ),
         child: Consumer<SoundProvider>(
           builder: (context, soundProvider, _) {
-            if (soundProvider.isLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (soundProvider.errorMessage != null) {
-              return Center(child: Text(soundProvider.errorMessage!));
-            }
-
             return CustomScrollView(
               slivers: [
                 _buildAppBar(context),
-                SliverPadding(
-                  padding: const EdgeInsets.all(16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      _buildWelcomeCard(context),
-                      const SizedBox(height: 24),
-                      _buildQuickStats(context),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle(context, 'Elements'),
-                      const SizedBox(height: 16),
-                      _buildElementsGrid(context, soundProvider),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle(context, 'Recently Played'),
-                      const SizedBox(height: 16),
-                      _buildRecentlyPlayed(context, soundProvider),
-                      const SizedBox(height: 100), // Space for bottom nav
-                    ]),
+
+                // Network Status Banner
+                if (!_isOnline)
+                  SliverToBoxAdapter(
+                    child: _buildOfflineBanner(),
                   ),
+
+                // Welcome Section
+                SliverToBoxAdapter(
+                  child: _buildWelcomeSection(context),
                 ),
+
+                // Loading State
+                if (soundProvider.isLoading)
+                  SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primaryGlass,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Loading sounds...',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                // Error State
+                if (soundProvider.errorMessage != null && !soundProvider.isLoading)
+                  SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline_rounded,
+                            size: 64,
+                            color: Colors.red.shade400,
+                          ),
+                          const SizedBox(height: 16),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 32),
+                            child: Text(
+                              soundProvider.errorMessage!,
+                              style: Theme.of(context).textTheme.bodyLarge,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton.icon(
+                            onPressed: () => soundProvider.fetchSounds(),
+                            icon: const Icon(Icons.refresh_rounded),
+                            label: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                // Elements List
+                if (!soundProvider.isLoading && soundProvider.errorMessage == null)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        _buildElementCard(
+                          context,
+                          'Earth',
+                          'earth',
+                          AppColors.earthGlass,
+                          AppColors.earthSolid,
+                          soundProvider.getSoundsByElement('earth'),
+                        ).animate(delay: 100.ms).fadeIn().slideX(begin: -0.2),
+
+                        const SizedBox(height: 16),
+
+                        _buildElementCard(
+                          context,
+                          'Fire',
+                          'fire',
+                          AppColors.fireGlass,
+                          AppColors.fireSolid,
+                          soundProvider.getSoundsByElement('fire'),
+                        ).animate(delay: 200.ms).fadeIn().slideX(begin: -0.2),
+
+                        const SizedBox(height: 16),
+
+                        _buildElementCard(
+                          context,
+                          'Water',
+                          'water',
+                          AppColors.waterGlass,
+                          AppColors.waterSolid,
+                          soundProvider.getSoundsByElement('water'),
+                        ).animate(delay: 300.ms).fadeIn().slideX(begin: -0.2),
+
+                        const SizedBox(height: 16),
+
+                        _buildElementCard(
+                          context,
+                          'Wind',
+                          'wind',
+                          AppColors.windGlass,
+                          AppColors.windSolid,
+                          soundProvider.getSoundsByElement('wind'),
+                        ).animate(delay: 400.ms).fadeIn().slideX(begin: -0.2),
+                      ]),
+                    ),
+                  ),
               ],
             );
           },
@@ -70,280 +191,393 @@ class HomeScreen extends StatelessWidget {
       floating: true,
       backgroundColor: Colors.transparent,
       elevation: 0,
-      title: const Text('Aura 3'),
+      title: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primaryGlass,
+                  AppColors.secondaryGlass,
+                ],
+              ),
+            ),
+            child: const Icon(Icons.waves_rounded, size: 24),
+          ),
+          const SizedBox(width: 12),
+          const Text('Aura'),
+        ],
+      ),
       actions: [
+        Consumer<SoundProvider>(
+          builder: (context, soundProvider, _) {
+            return IconButton(
+              icon: const Icon(Icons.refresh_rounded),
+              onPressed: soundProvider.isLoading
+                  ? null
+                  : () => soundProvider.fetchSounds(),
+            );
+          },
+        ),
         IconButton(
-          icon: const Icon(Icons.notifications_rounded),
+          icon: const Icon(Icons.notifications_outlined),
           onPressed: () {},
         ),
       ],
     );
   }
 
-  Widget _buildWelcomeCard(BuildContext context) {
-    return GlassContainer(
-      gradient: LinearGradient(
-        colors: [
-          AppColors.primaryGlass.withAlpha(77),
-          AppColors.secondaryGlass.withAlpha(77),
+  Widget _buildOfflineBanner() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.orange.withOpacity(0.5),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.wifi_off_rounded, color: Colors.orange.shade300, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Offline Mode - Using cached data',
+              style: TextStyle(
+                color: Colors.orange.shade200,
+                fontSize: 13,
+              ),
+            ),
+          ),
         ],
       ),
+    ).animate().fadeIn().slideY(begin: -0.5);
+  }
+
+  Widget _buildWelcomeSection(BuildContext context) {
+    final hour = DateTime.now().hour;
+    String greeting;
+
+    if (hour < 12) {
+      greeting = 'Good Morning';
+    } else if (hour < 17) {
+      greeting = 'Good Afternoon';
+    } else {
+      greeting = 'Good Evening';
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Good Evening',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Ready to relax?',
-            style: Theme.of(context).textTheme.displaySmall,
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.play_arrow_rounded),
-                  label: const Text('Continue'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryGlass,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0);
-  }
-
-  Widget _buildQuickStats(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            context,
-            icon: Icons.timer_rounded,
-            value: '2.5h',
-            label: 'Today',
-            color: AppColors.earthGlass,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            context,
-            icon: Icons.local_fire_department_rounded,
-            value: '7',
-            label: 'Streak',
-            color: AppColors.fireGlass,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            context,
-            icon: Icons.mood_rounded,
-            value: '94%',
-            label: 'Mood',
-            color: AppColors.waterGlass,
-          ),
-        ),
-      ],
-    ).animate().fadeIn(delay: 200.ms, duration: 600.ms);
-  }
-
-  Widget _buildStatCard(BuildContext context, {
-    required IconData icon,
-    required String value,
-    required String label,
-    required Color color,
-  }) {
-    return GlassContainer(
-      padding: const EdgeInsets.all(16),
-      color: color.withAlpha(26),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 28),
+            greeting,
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ).animate().fadeIn(delay: 100.ms),
           const SizedBox(height: 8),
           Text(
-            value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+            'Choose your element to begin',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ).animate().fadeIn(delay: 200.ms),
+          const SizedBox(height: 8),
         ],
       ),
-    );
-  }
-
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.headlineMedium,
-      ),
-    );
-  }
-
-  Widget _buildElementsGrid(BuildContext context, SoundProvider soundProvider) {
-    final elements = [
-      {'name': 'Earth', 'icon': '🌍', 'color': AppColors.earthGlass},
-      {'name': 'Fire', 'icon': '🔥', 'color': AppColors.fireGlass},
-      {'name': 'Water', 'icon': '💧', 'color': AppColors.waterGlass},
-      {'name': 'Wind', 'icon': '💨', 'color': AppColors.windGlass},
-    ];
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.2,
-      ),
-      itemCount: elements.length,
-      itemBuilder: (context, index) {
-        final element = elements[index];
-        final sounds = soundProvider.getSoundsByElement(element['name']! as String);
-
-        return _buildElementCard(
-          context,
-          name: element['name'] as String,
-          icon: element['icon'] as String,
-          color: element['color'] as Color,
-          soundCount: sounds.length,
-        ).animate(delay: (100 * index).ms).fadeIn(duration: 600.ms).scale();
-      },
     );
   }
 
   Widget _buildElementCard(
-      BuildContext context, {
-        required String name,
-        required String icon,
-        required Color color,
-        required int soundCount,
-      }) {
+      BuildContext context,
+      String elementName,
+      String elementKey,
+      Color glassColor,
+      Color solidColor,
+      List<Sound> sounds,
+      ) {
+    final isExpanded = _expandedElement == elementKey;
+
     return GestureDetector(
       onTap: () {
-        // Navigate to library filtered by element
+        setState(() {
+          _expandedElement = isExpanded ? null : elementKey;
+        });
       },
       child: GlassContainer(
-        color: color.withAlpha(38),
+        padding: EdgeInsets.zero,
+        color: glassColor.withAlpha(isExpanded ? 51 : 26),
         border: Border.all(
-          color: color.withAlpha(77),
-          width: 1.5,
+          color: isExpanded ? solidColor.withAlpha(128) : glassColor.withAlpha(77),
+          width: isExpanded ? 2 : 1.5,
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              icon,
-              style: const TextStyle(fontSize: 48),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              name,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '$soundCount sounds',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecentlyPlayed(BuildContext context, SoundProvider soundProvider) {
-    // This will be replaced with real recently played logic later
-    final recentSounds = soundProvider.sounds.take(3).toList();
-
-    return Column(
-      children: List.generate(
-        recentSounds.length,
-            (index) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _buildRecentItem(context, recentSounds[index], index),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecentItem(BuildContext context, Sound sound, int index) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => PlayerScreen(sound: sound),
-          ),
-        );
-      },
-      child: GlassContainer(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.getElementSolidColor(sound.element),
-                    AppColors.getElementSolidColor(sound.element).withAlpha(153),
-                  ],
-                ),
-              ),
-              child: Icon(
-                _getElementIcon(sound.element),
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
                 children: [
-                  Text(
-                    sound.title,
-                    style: Theme.of(context).textTheme.titleMedium,
+                  // Element Icon
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          solidColor,
+                          solidColor.withOpacity(0.7),
+                        ],
+                      ),
+                      boxShadow: isExpanded ? [
+                        BoxShadow(
+                          color: solidColor.withOpacity(0.4),
+                          blurRadius: 12,
+                          spreadRadius: 2,
+                        ),
+                      ] : [],
+                    ),
+                    child: Image.asset(
+                      'assets/images/element_${elementKey.toLowerCase()}.png',
+                      width: 40,
+                      height: 40,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Fallback to icon if image not found
+                        return Icon(
+                          _getElementIcon(elementKey),
+                          size: 32,
+                          color: Colors.white,
+                        );
+                      },
+                    ),
                   ),
-                  Text(
-                    '${sound.element} • ${sound.formattedDuration}',
-                    style: Theme.of(context).textTheme.bodySmall,
+                  const SizedBox(width: 16),
+
+                  // Element Info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          elementName,
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: solidColor,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${sounds.length} ${sounds.length == 1 ? 'sound' : 'sounds'}',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Expand Icon
+                  AnimatedRotation(
+                    turns: isExpanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 300),
+                    child: Icon(
+                      Icons.expand_more_rounded,
+                      color: solidColor,
+                      size: 32,
+                    ),
                   ),
                 ],
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.play_arrow_rounded),
-              color: AppColors.primaryGlass,
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => PlayerScreen(sound: sound),
+
+            // Expanded Content
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: isExpanded
+                  ? Column(
+                children: [
+                  const Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: Colors.white12,
                   ),
-                );
-              },
+                  ...sounds.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final sound = entry.value;
+                    return _buildSoundTile(
+                      context,
+                      sound,
+                      solidColor,
+                      isLast: index == sounds.length - 1,
+                    );
+                  }).toList(),
+                ],
+              )
+                  : const SizedBox.shrink(),
             ),
           ],
         ),
-      ).animate(delay: (100 * index).ms).fadeIn(duration: 600.ms).slideX(begin: 0.2, end: 0),
+      ),
+    );
+  }
+
+  Widget _buildSoundTile(
+      BuildContext context,
+      Sound sound,
+      Color elementColor,
+      {bool isLast = false}
+      ) {
+    return Consumer<FavoritesProvider>(
+      builder: (context, favoritesProvider, _) {
+        final isFavorite = favoritesProvider.isFavorite(sound.id);
+
+        return InkWell(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => PlayerScreen(sound: sound),
+              ),
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              border: isLast ? null : const Border(
+                bottom: BorderSide(
+                  color: Colors.white12,
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                // Play Button
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: elementColor.withOpacity(0.2),
+                    border: Border.all(
+                      color: elementColor.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.play_arrow_rounded,
+                    color: elementColor,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+
+                // Sound Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        sound.title,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.access_time_rounded,
+                            size: 14,
+                            color: AppColors.textTertiary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            sound.formattedDuration,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
+                          ),
+                          if (sound.fileSize != null) ...[
+                            const SizedBox(width: 12),
+                            Icon(
+                              Icons.storage_rounded,
+                              size: 14,
+                              color: AppColors.textTertiary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              sound.fileSize!,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.textTertiary,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      if (sound.tags.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: sound.tags.take(3).map((tag) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: elementColor.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: elementColor.withOpacity(0.3),
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: Text(
+                                tag,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontSize: 11,
+                                  color: elementColor,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Favorite Button
+                IconButton(
+                  icon: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorite ? Colors.red : AppColors.textSecondary,
+                    size: 22,
+                  ),
+                  onPressed: () {
+                    favoritesProvider.toggleFavorite(sound.id);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

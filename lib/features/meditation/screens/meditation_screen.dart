@@ -1,8 +1,11 @@
-
-// lib/features/meditation/screens/meditation_screen.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/widgets/glass_container.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/models/meditation_program.dart';
+import '../providers/meditation_provider.dart';
+import 'meditation_session_screen.dart';
 
 class MeditationScreen extends StatelessWidget {
   const MeditationScreen({super.key});
@@ -23,45 +26,79 @@ class MeditationScreen extends StatelessWidget {
           ),
         ),
         child: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                floating: true,
-                backgroundColor: Colors.transparent,
-                title: const Text('Meditation'),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _buildTimerCard(context),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Guided Sessions',
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    ...List.generate(
-                      5,
-                          (index) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _buildSessionCard(context, index),
+          child: Consumer<MeditationProvider>(
+            builder: (context, meditationProvider, _) {
+              if (meditationProvider.isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (meditationProvider.errorMessage != null) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline_rounded,
+                        size: 64,
+                        color: Colors.red.shade400,
                       ),
+                      const SizedBox(height: 16),
+                      Text(
+                        meditationProvider.errorMessage!,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              final programs = meditationProvider.programs;
+
+              return CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    floating: true,
+                    backgroundColor: Colors.transparent,
+                    title: const Text('Meditation'),
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.all(16),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        _buildWelcomeCard(context),
+                        const SizedBox(height: 24),
+                        Text(
+                          'Programs',
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                        const SizedBox(height: 16),
+                        ...programs.asMap().entries.map(
+                              (entry) => Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: _buildProgramCard(
+                              context,
+                              entry.value,
+                              meditationProvider,
+                              entry.key,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 100),
+                      ]),
                     ),
-                    const SizedBox(height: 100),
-                  ]),
-                ),
-              ),
-            ],
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTimerCard(BuildContext context) {
+  Widget _buildWelcomeCard(BuildContext context) {
     return GlassContainer(
-      padding: const EdgeInsets.all(24),
       gradient: LinearGradient(
         colors: [
           AppColors.secondaryGlass.withOpacity(0.3),
@@ -69,100 +106,231 @@ class MeditationScreen extends StatelessWidget {
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Quick Timer',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            '10:00',
-            style: Theme.of(context).textTheme.displayLarge?.copyWith(
-              fontSize: 48,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 24),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildTimerButton(context, '5m'),
-              const SizedBox(width: 12),
-              _buildTimerButton(context, '10m'),
-              const SizedBox(width: 12),
-              _buildTimerButton(context, '15m'),
-              const SizedBox(width: 12),
-              _buildTimerButton(context, '30m'),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.secondaryGlass.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.self_improvement_rounded,
+                  size: 32,
+                  color: AppColors.secondaryGlass,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Start Your Journey',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    Text(
+                      'Choose a program below',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: const Text('Start'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.secondaryGlass,
-              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-            ),
           ),
         ],
       ),
-    );
+    ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0);
   }
 
-  Widget _buildTimerButton(BuildContext context, String time) {
-    return GlassContainer(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Text(time, style: Theme.of(context).textTheme.titleMedium),
-    );
-  }
+  Widget _buildProgramCard(
+      BuildContext context,
+      MeditationProgram program,
+      MeditationProvider provider,
+      int index,
+      ) {
+    final completionPercentage = provider.getCompletionPercentage(program.id);
+    final completedDay = provider.getCompletedDay(program.id);
+    final isCompleted = provider.isProgramCompleted(program.id);
 
-  Widget _buildSessionCard(BuildContext context, int index) {
-    return GlassContainer(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.secondaryGlass,
-                  AppColors.tertiaryGlass,
-                ],
-              ),
-            ),
-            child: const Icon(
-              Icons.self_improvement_rounded,
-              color: Colors.white,
-              size: 30,
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => MeditationSessionScreen(program: program),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        );
+      },
+      child: GlassContainer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                Text(
-                  'Meditation Session ${index + 1}',
-                  style: Theme.of(context).textTheme.titleMedium,
+                // Level badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _getLevelColor(program.level).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: _getLevelColor(program.level),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    program.level.toUpperCase(),
+                    style: TextStyle(
+                      color: _getLevelColor(program.level),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-                Text(
-                  '${(index + 1) * 5} minutes',
-                  style: Theme.of(context).textTheme.bodySmall,
+                const Spacer(),
+                // Days badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGlass.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.calendar_today_rounded,
+                        size: 12,
+                        color: AppColors.primaryGlass,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${program.totalDays} days',
+                        style: const TextStyle(
+                          color: AppColors.primaryGlass,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.play_arrow_rounded),
-            color: AppColors.secondaryGlass,
-            onPressed: () {},
-          ),
-        ],
+            const SizedBox(height: 16),
+            Text(
+              program.title,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              program.description,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 16),
+            // Progress bar
+            if (completedDay > 0) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(
+                        value: completionPercentage,
+                        backgroundColor: AppColors.borderGlass,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          isCompleted
+                              ? Colors.green
+                              : AppColors.secondaryGlass,
+                        ),
+                        minHeight: 8,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    isCompleted
+                        ? 'Completed!'
+                        : 'Day $completedDay/${program.totalDays}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: isCompleted
+                          ? Colors.green
+                          : AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+            // Action button
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              MeditationSessionScreen(program: program),
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      isCompleted
+                          ? Icons.replay_rounded
+                          : completedDay > 0
+                          ? Icons.play_arrow_rounded
+                          : Icons.start_rounded,
+                    ),
+                    label: Text(
+                      isCompleted
+                          ? 'Restart'
+                          : completedDay > 0
+                          ? 'Continue'
+                          : 'Start',
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.secondaryGlass,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ).animate(delay: (100 * index).ms).fadeIn(duration: 600.ms).slideX(
+        begin: 0.2,
+        end: 0,
       ),
     );
+  }
+
+  Color _getLevelColor(String level) {
+    switch (level.toLowerCase()) {
+      case 'beginner':
+        return Colors.green;
+      case 'intermediate':
+        return Colors.blue;
+      case 'advanced':
+        return Colors.purple;
+      default:
+        return AppColors.textSecondary;
+    }
   }
 }

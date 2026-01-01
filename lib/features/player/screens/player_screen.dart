@@ -8,8 +8,7 @@ import '../../../core/widgets/glass_container.dart';
 import '../providers/audio_provider.dart';
 import '../../library/providers/favorites_provider.dart';
 import '../../profile/providers/preferences_provider.dart';
-import 'package:sensors_plus/sensors_plus.dart';
-import 'dart:async';
+
 class PlayerScreen extends StatefulWidget {
   final Sound sound;
 
@@ -24,20 +23,29 @@ class PlayerScreen extends StatefulWidget {
 
 class _PlayerScreenState extends State<PlayerScreen> {
   Duration _listenedDuration = Duration.zero;
+  bool _hasStartedPlaying = false;
 
   @override
   void initState() {
     super.initState();
+    // OPTIMIZED: Start playing AFTER the frame is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final audioProvider = context.read<AudioProvider>();
-      final favoritesProvider = context.read<FavoritesProvider>();
-
-      // Play sound
-      audioProvider.playSound(widget.sound);
-
-      // Add to recently played
-      favoritesProvider.addRecentlyPlayed(widget.sound.id);
+      _startPlayback();
     });
+  }
+
+  Future<void> _startPlayback() async {
+    if (_hasStartedPlaying) return;
+    _hasStartedPlaying = true;
+
+    final audioProvider = context.read<AudioProvider>();
+    final favoritesProvider = context.read<FavoritesProvider>();
+
+    // Start playing (non-blocking UI)
+    audioProvider.playSound(widget.sound);
+
+    // Add to recently played (async, doesn't block)
+    favoritesProvider.addRecentlyPlayed(widget.sound.id);
   }
 
   @override
@@ -55,6 +63,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
+    // OPTIMIZED: Use element color immediately without waiting
+    final elementColor = AppColors.getElementColor(widget.sound.element);
+    final elementSolidColor = AppColors.getElementSolidColor(widget.sound.element);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -89,14 +101,15 @@ class _PlayerScreenState extends State<PlayerScreen> {
       body: Container(
         width: size.width,
         height: size.height,
+        // OPTIMIZED: Background gradient shows immediately
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
               AppColors.backgroundDark,
-              AppColors.getElementColor(widget.sound.element).withOpacity(0.3),
-              AppColors.getElementColor(widget.sound.element).withOpacity(0.2),
+              elementColor.withOpacity(0.3),
+              elementColor.withOpacity(0.2),
               AppColors.backgroundDark,
             ],
           ),
@@ -104,6 +117,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
         child: SafeArea(
           child: Consumer<AudioProvider>(
             builder: (context, audioProvider, _) {
+              // Show error if any (but don't block the UI)
               if (audioProvider.errorMessage != null) {
                 return Center(
                   child: Column(
@@ -130,45 +144,54 @@ class _PlayerScreenState extends State<PlayerScreen> {
                 );
               }
 
-              if (audioProvider.isLoading) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GlassContainer(
-                        padding: const EdgeInsets.all(32),
-                        child: CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.getElementSolidColor(widget.sound.element),
+              // OPTIMIZED: Show UI immediately, overlay loading indicator
+              return Stack(
+                children: [
+                  // Main content (always visible)
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        _buildArtwork(elementSolidColor),
+                        const SizedBox(height: 40),
+                        _buildSoundInfo(elementSolidColor),
+                        const SizedBox(height: 40),
+                        _buildProgressBar(audioProvider, elementSolidColor),
+                        const SizedBox(height: 40),
+                        _buildControls(audioProvider, elementSolidColor),
+                        const SizedBox(height: 32),
+                        _buildVolumeControl(audioProvider),
+                      ],
+                    ),
+                  ),
+
+                  // Loading overlay (only shown while loading)
+                  if (audioProvider.isLoading)
+                    Container(
+                      color: Colors.black.withOpacity(0.3),
+                      child: Center(
+                        child: GlassContainer(
+                          padding: const EdgeInsets.all(32),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  elementSolidColor,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Loading ${widget.sound.title}...',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Loading ${widget.sound.title}...',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 20),
-                    _buildArtwork(),
-                    const SizedBox(height: 40),
-                    _buildSoundInfo(),
-                    const SizedBox(height: 40),
-                    _buildProgressBar(audioProvider),
-                    const SizedBox(height: 40),
-                    _buildControls(audioProvider),
-                    const SizedBox(height: 32),
-                    _buildVolumeControl(audioProvider),
-                  ],
-                ),
+                    ),
+                ],
               );
             },
           ),
@@ -177,7 +200,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
     );
   }
 
-  Widget _buildArtwork() {
+  Widget _buildArtwork(Color elementSolidColor) {
     return Hero(
       tag: 'sound_${widget.sound.id}',
       child: GlassContainer(
@@ -191,8 +214,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppColors.getElementSolidColor(widget.sound.element),
-                AppColors.getElementSolidColor(widget.sound.element).withOpacity(0.6),
+                elementSolidColor,
+                elementSolidColor.withOpacity(0.6),
               ],
             ),
           ),
@@ -208,7 +231,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
     ).animate().scale(duration: 600.ms, curve: Curves.easeOut);
   }
 
-  Widget _buildSoundInfo() {
+  Widget _buildSoundInfo(Color elementSolidColor) {
     return Column(
       children: [
         Text(
@@ -233,14 +256,14 @@ class _PlayerScreenState extends State<PlayerScreen> {
               Icon(
                 _getElementIcon(widget.sound.element),
                 size: 20,
-                color: AppColors.getElementSolidColor(widget.sound.element),
+                color: elementSolidColor,
               ),
               const SizedBox(width: 8),
               Text(
                 widget.sound.element.toUpperCase(),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppColors.getElementSolidColor(widget.sound.element),
+                  color: elementSolidColor,
                 ),
               ),
             ],
@@ -250,7 +273,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
     );
   }
 
-  Widget _buildProgressBar(AudioProvider audioProvider) {
+  Widget _buildProgressBar(AudioProvider audioProvider, Color elementSolidColor) {
     return StreamBuilder<Duration>(
       stream: audioProvider.positionStream,
       builder: (context, snapshot) {
@@ -271,16 +294,18 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   trackHeight: 6,
                   thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
                   overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-                  activeTrackColor: AppColors.getElementSolidColor(widget.sound.element),
+                  activeTrackColor: elementSolidColor,
                   inactiveTrackColor: AppColors.borderGlass,
                   thumbColor: Colors.white,
-                  overlayColor: AppColors.getElementSolidColor(widget.sound.element).withOpacity(0.3),
+                  overlayColor: elementSolidColor.withOpacity(0.3),
                 ),
                 child: Slider(
                   value: duration.inMilliseconds > 0
                       ? position.inMilliseconds.toDouble()
                       : 0.0,
-                  max: duration.inMilliseconds.toDouble(),
+                  max: duration.inMilliseconds > 0
+                      ? duration.inMilliseconds.toDouble()
+                      : 1.0,
                   onChanged: (value) {
                     audioProvider.seek(Duration(milliseconds: value.toInt()));
                   },
@@ -310,7 +335,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
     );
   }
 
-  Widget _buildControls(AudioProvider audioProvider) {
+  Widget _buildControls(AudioProvider audioProvider, Color elementSolidColor) {
     return GlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Row(
@@ -326,7 +351,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
             onPressed: audioProvider.skipBackward,
             size: 32,
           ),
-          _buildPlayPauseButton(audioProvider),
+          _buildPlayPauseButton(audioProvider, elementSolidColor),
           _buildControlButton(
             icon: Icons.forward_10_rounded,
             onPressed: audioProvider.skipForward,
@@ -343,7 +368,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
     ).animate().fadeIn(delay: 500.ms).scale();
   }
 
-  Widget _buildPlayPauseButton(AudioProvider audioProvider) {
+  Widget _buildPlayPauseButton(AudioProvider audioProvider, Color elementSolidColor) {
     return StreamBuilder<bool>(
       stream: audioProvider.playingStream,
       builder: (context, snapshot) {
@@ -358,13 +383,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 colors: [
-                  AppColors.getElementSolidColor(widget.sound.element),
-                  AppColors.getElementSolidColor(widget.sound.element).withOpacity(0.7),
+                  elementSolidColor,
+                  elementSolidColor.withOpacity(0.7),
                 ],
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.getElementSolidColor(widget.sound.element).withOpacity(0.5),
+                  color: elementSolidColor.withOpacity(0.5),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),

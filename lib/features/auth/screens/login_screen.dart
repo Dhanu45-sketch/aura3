@@ -29,7 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleLogin() {
     final authProvider = context.read<AuthProvider>();
 
-    // Validate inputs
     if (_emailController.text.trim().isEmpty) {
       _showError('Please enter your email');
       return;
@@ -40,7 +39,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Sign in
     authProvider.signIn(
       email: _emailController.text.trim(),
       password: _passwordController.text,
@@ -113,7 +111,6 @@ class _LoginScreenState extends State<LoginScreen> {
         child: SafeArea(
           child: Consumer<AuthProvider>(
             builder: (context, authProvider, _) {
-              // Show error if any
               if (authProvider.errorMessage != null) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   _showError(authProvider.errorMessage!);
@@ -163,34 +160,10 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildLogo() {
     return Column(
       children: [
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: [
-                AppColors.primaryGlass,
-                AppColors.secondaryGlass,
-              ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primaryGlass.withAlpha(128),
-                blurRadius: 30,
-                spreadRadius: 5,
-              ),
-            ],
-          ),
-          child: const Icon(
-            Icons.waves_rounded,
-            size: 50,
-            color: Colors.white,
-          ),
-        )
-            .animate()
-            .scale(duration: 600.ms, curve: Curves.easeOut)
-            .fadeIn(duration: 400.ms),
+        Image.asset(
+          'assets/images/aura_logo.png', // CORRECTED: Using your logo
+          height: 120,
+        ).animate().fadeIn(duration: 600.ms).scale(),
         const SizedBox(height: 24),
         Text(
           'Aura 3',
