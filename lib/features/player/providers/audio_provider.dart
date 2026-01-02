@@ -11,7 +11,10 @@ class AudioProvider extends ChangeNotifier {
   String? _errorMessage;
   double _volume = 1.0;
   bool _isLooping = false;
-  List<Sound> _playlist = [];
+
+  // Playlist context
+  String? _currentPlaylistId;
+  List<Sound> _currentPlaylist = [];
   int _currentIndex = 0;
 
   // Getters
@@ -23,9 +26,11 @@ class AudioProvider extends ChangeNotifier {
   Duration? get duration => _audioService.duration;
   double get volume => _volume;
   bool get isLooping => _isLooping;
-  List<Sound> get playlist => _playlist;
+
+  String? get currentPlaylistId => _currentPlaylistId;
+  List<Sound> get currentPlaylist => _currentPlaylist;
   int get currentIndex => _currentIndex;
-  bool get hasNext => _currentIndex < _playlist.length - 1;
+  bool get hasNext => _currentIndex < _currentPlaylist.length - 1;
   bool get hasPrevious => _currentIndex > 0;
 
   Stream<Duration> get positionStream => _audioService.positionStream;
@@ -40,30 +45,35 @@ class AudioProvider extends ChangeNotifier {
     await _audioService.initialize();
   }
 
-  // Play sound
-  Future<void> playSound(Sound sound, {List<Sound>? playlist}) async {
+  // Play sound with playlist context
+  Future<void> playSound(
+      Sound sound, {
+        String? playlistId,
+        List<Sound>? playlist,
+      }) async {
     _setLoading(true);
     _clearError();
 
     try {
       _currentSound = sound;
+      _currentPlaylistId = playlistId;
 
-      // Set playlist if provided
+      // Set playlist context
       if (playlist != null && playlist.isNotEmpty) {
-        _playlist = playlist;
+        _currentPlaylist = playlist;
         _currentIndex = playlist.indexWhere((s) => s.id == sound.id);
         if (_currentIndex == -1) _currentIndex = 0;
       } else {
-        // Create playlist with just this sound
-        _playlist = [sound];
+        // Create single-sound playlist
+        _currentPlaylist = [sound];
         _currentIndex = 0;
       }
 
+      debugPrint('Playing: ${sound.title} (${_currentIndex + 1}/${_currentPlaylist.length})');
+      debugPrint('Playlist ID: $_currentPlaylistId');
+
       await _audioService.playSound(sound);
       _setLoading(false);
-
-      // Add to recently played (will be done by FavoritesProvider)
-      // Track listening session will be done when sound finishes/stops
     } catch (e) {
       _setError('Failed to play sound: ${e.toString()}');
       _setLoading(false);
@@ -73,28 +83,34 @@ class AudioProvider extends ChangeNotifier {
   // Play next sound in playlist
   Future<void> playNext() async {
     if (!hasNext) {
-      // Loop back to first if at end
-      _currentIndex = 0;
-    } else {
-      _currentIndex++;
+      debugPrint('No next track available');
+      return;
     }
 
-    if (_currentIndex < _playlist.length) {
-      await playSound(_playlist[_currentIndex], playlist: _playlist);
+    _currentIndex++;
+    if (_currentIndex < _currentPlaylist.length) {
+      await playSound(
+        _currentPlaylist[_currentIndex],
+        playlistId: _currentPlaylistId,
+        playlist: _currentPlaylist,
+      );
     }
   }
 
   // Play previous sound in playlist
   Future<void> playPrevious() async {
     if (!hasPrevious) {
-      // Go to last if at beginning
-      _currentIndex = _playlist.length - 1;
-    } else {
-      _currentIndex--;
+      debugPrint('No previous track available');
+      return;
     }
 
-    if (_currentIndex >= 0 && _currentIndex < _playlist.length) {
-      await playSound(_playlist[_currentIndex], playlist: _playlist);
+    _currentIndex--;
+    if (_currentIndex >= 0 && _currentIndex < _currentPlaylist.length) {
+      await playSound(
+        _currentPlaylist[_currentIndex],
+        playlistId: _currentPlaylistId,
+        playlist: _currentPlaylist,
+      );
     }
   }
 

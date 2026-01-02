@@ -1,10 +1,11 @@
-// lib/features/profile/screens/profile_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/widgets/glass_container.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/preferences_provider.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -23,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               AppColors.backgroundDark,
-              AppColors.accentGlass.withValues(alpha: 0.1),
+              AppColors.accentGlass.withOpacity(0.1),
               AppColors.backgroundDark,
             ],
           ),
@@ -40,13 +41,13 @@ class ProfileScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    _buildProfileHeader(context, user?.displayName, user?.email),
+                    _buildProfileHeader(context, user?.displayName, user?.email, prefsProvider),
                     const SizedBox(height: 24),
                     _buildStatsGrid(context, prefsProvider),
                     const SizedBox(height: 24),
-                    _buildPreferencesSection(context, prefsProvider),
+                    _buildSettingsSection(context, prefsProvider),
                     const SizedBox(height: 24),
-                    _buildSettingsSection(context, authProvider),
+                    _buildAccountSection(context, authProvider),
                     const SizedBox(height: 100),
                   ]),
                 ),
@@ -58,228 +59,158 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context, String? name, String? email) {
-    final prefsProvider = context.watch<PreferencesProvider>();
-    final authProvider = context.read<AuthProvider>();
-
+  Widget _buildProfileHeader(
+      BuildContext context,
+      String? name,
+      String? email,
+      PreferencesProvider prefsProvider,
+      ) {
     return GlassContainer(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
+          // Profile picture
           Stack(
             children: [
-              GestureDetector(
-                onTap: () => _showImagePickerOptions(context, authProvider.user?.uid ?? ''),
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: prefsProvider.profilePictureUrl == null
-                        ? LinearGradient(
-                      colors: [
-                        AppColors.primaryGlass,
-                        AppColors.accentGlass,
-                      ],
-                    )
-                        : null,
-                    image: prefsProvider.profilePictureUrl != null
-                        ? DecorationImage(
-                      image: NetworkImage(prefsProvider.profilePictureUrl!),
-                      fit: BoxFit.cover,
-                    )
-                        : null,
-                  ),
-                  child: prefsProvider.isUploadingImage
-                      ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: prefsProvider.profilePictureUrl == null
+                      ? LinearGradient(
+                    colors: [
+                      AppColors.primaryGlass,
+                      AppColors.accentGlass,
+                    ],
                   )
-                      : prefsProvider.profilePictureUrl == null
-                      ? Center(
-                    child: Text(
-                      name?.substring(0, 1).toUpperCase() ?? 'U',
-                      style: const TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
+                      : null,
+                  image: prefsProvider.profilePictureUrl != null
+                      ? DecorationImage(
+                    image: NetworkImage(prefsProvider.profilePictureUrl!),
+                    fit: BoxFit.cover,
                   )
                       : null,
                 ),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: GestureDetector(
-                  onTap: () => _showImagePickerOptions(context, authProvider.user?.uid ?? ''),
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryGlass,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.backgroundDark,
-                        width: 3,
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.camera_alt_rounded,
-                      size: 18,
+                child: prefsProvider.isUploadingImage
+                    ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+                    : prefsProvider.profilePictureUrl == null
+                    ? Center(
+                  child: Text(
+                    name?.substring(0, 1).toUpperCase() ?? 'U',
+                    style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                ),
+                )
+                    : null,
               ),
             ],
           ),
           const SizedBox(height: 16),
+          // Name and email
           Text(
             name ?? 'User Name',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
+          const SizedBox(height: 4),
           Text(
             email ?? 'user@email.com',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),
           ),
+          const SizedBox(height: 16),
+          // Edit button
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const EditProfileScreen(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.edit_rounded, size: 18),
+            label: const Text('Edit Profile'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryGlass,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
         ],
       ),
-    );
-  }
-
-  void _showImagePickerOptions(BuildContext context, String userId) {
-    final prefsProvider = context.read<PreferencesProvider>();
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        margin: const EdgeInsets.all(16),
-        child: GlassContainer(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Change Profile Picture',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 20),
-              ListTile(
-                leading: const Icon(Icons.camera_alt_rounded, color: AppColors.primaryGlass),
-                title: const Text('Take Photo'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  final success = await prefsProvider.updateProfilePictureFromCamera(userId);
-                  if (context.mounted) {
-                    _showMessage(
-                      context,
-                      success ? 'Profile picture updated!' : 'Failed to update picture',
-                      success,
-                    );
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library_rounded, color: AppColors.primaryGlass),
-                title: const Text('Choose from Gallery'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  final success = await prefsProvider.updateProfilePictureFromGallery(userId);
-                  if (context.mounted) {
-                    _showMessage(
-                      context,
-                      success ? 'Profile picture updated!' : 'Failed to update picture',
-                      success,
-                    );
-                  }
-                },
-              ),
-              if (prefsProvider.profilePictureUrl != null)
-                ListTile(
-                  leading: const Icon(Icons.delete_rounded, color: Colors.red),
-                  title: const Text('Remove Photo', style: TextStyle(color: Colors.red)),
-                  onTap: () async {
-                    Navigator.pop(context);
-                    final success = await prefsProvider.removeProfilePicture();
-                    if (context.mounted) {
-                      _showMessage(
-                        context,
-                        success ? 'Profile picture removed' : 'Failed to remove picture',
-                        success,
-                      );
-                    }
-                  },
-                ),
-              const SizedBox(height: 10),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showMessage(BuildContext context, String message, bool isSuccess) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isSuccess ? Colors.green : Colors.red,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
+    ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0);
   }
 
   Widget _buildStatsGrid(BuildContext context, PreferencesProvider prefsProvider) {
     return Row(
       children: [
-        Expanded(child: _buildStatCard(context, prefsProvider.formattedListeningTime, 'Total Time')),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            icon: Icons.timer_rounded,
+            value: prefsProvider.formattedListeningTime,
+            label: 'Total Time',
+            color: AppColors.earthGlass,
+          ),
+        ),
         const SizedBox(width: 12),
-        Expanded(child: _buildStatCard(context, '45', 'Sessions')),
-        const SizedBox(width: 12),
-        Expanded(child: _buildStatCard(context, '${prefsProvider.streak}', 'Streak')),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            icon: Icons.local_fire_department_rounded,
+            value: '${prefsProvider.streak}',
+            label: 'Day Streak',
+            color: AppColors.fireGlass,
+          ),
+        ),
       ],
-    );
+    ).animate().fadeIn(delay: 200.ms, duration: 600.ms);
   }
 
-  Widget _buildStatCard(BuildContext context, String value, String label) {
+  Widget _buildStatCard(
+      BuildContext context, {
+        required IconData icon,
+        required String value,
+        required String label,
+        required Color color,
+      }) {
     return GlassContainer(
       padding: const EdgeInsets.all(16),
+      color: color.withOpacity(0.1),
       child: Column(
         children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 8),
           Text(
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 4),
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall,
-            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPreferencesSection(BuildContext context, PreferencesProvider prefsProvider) {
+  Widget _buildSettingsSection(BuildContext context, PreferencesProvider prefsProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
-            'Preferences',
+            'Settings',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
         ),
@@ -303,10 +234,8 @@ class ProfileScreen extends StatelessWidget {
           value: prefsProvider.notificationsEnabled,
           onChanged: (value) => prefsProvider.setNotificationsEnabled(value),
         ),
-        const SizedBox(height: 12),
-        _buildQualitySelector(context, prefsProvider),
       ],
-    );
+    ).animate().fadeIn(delay: 300.ms, duration: 600.ms);
   }
 
   Widget _buildThemeSelector(BuildContext context, PreferencesProvider prefsProvider) {
@@ -384,13 +313,11 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryGlass.withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.05),
+              ? AppColors.primaryGlass.withOpacity(0.3)
+              : Colors.white.withOpacity(0.05),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primaryGlass
-                : AppColors.borderGlass,
+            color: isSelected ? AppColors.primaryGlass : AppColors.borderGlass,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -455,116 +382,40 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQualitySelector(BuildContext context, PreferencesProvider prefsProvider) {
-    return GlassContainer(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.high_quality_rounded,
-                color: AppColors.primaryGlass,
-              ),
-              const SizedBox(width: 16),
-              Text(
-                'Download Quality',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildQualityChip(
-                  context,
-                  'Low',
-                  'low',
-                  prefsProvider.downloadQuality == 'low',
-                      () => prefsProvider.setDownloadQuality('low'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildQualityChip(
-                  context,
-                  'Medium',
-                  'medium',
-                  prefsProvider.downloadQuality == 'medium',
-                      () => prefsProvider.setDownloadQuality('medium'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildQualityChip(
-                  context,
-                  'High',
-                  'high',
-                  prefsProvider.downloadQuality == 'high',
-                      () => prefsProvider.setDownloadQuality('high'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQualityChip(
-      BuildContext context,
-      String label,
-      String value,
-      bool isSelected,
-      VoidCallback onTap,
-      ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryGlass.withValues(alpha: 0.3)
-              : Colors.white.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected ? AppColors.primaryGlass : AppColors.borderGlass,
-            width: isSelected ? 2 : 1,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              fontSize: 13,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSettingsSection(BuildContext context, AuthProvider authProvider) {
+  Widget _buildAccountSection(BuildContext context, AuthProvider authProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
-            'Settings',
+            'Account',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
         ),
         const SizedBox(height: 16),
-        _buildSettingItem(context, Icons.download_rounded, 'Downloads', () {}),
+        _buildSettingItem(
+          context,
+          Icons.help_rounded,
+          'Help & Support',
+              () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Help & Support - Coming soon!'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
+        ),
         const SizedBox(height: 12),
-        _buildSettingItem(context, Icons.help_rounded, 'Help & Support', () {}),
-        const SizedBox(height: 12),
-        _buildSettingItem(context, Icons.info_rounded, 'About', () {}),
+        _buildSettingItem(
+          context,
+          Icons.info_rounded,
+          'About',
+              () {
+            _showAboutDialog(context);
+          },
+        ),
         const SizedBox(height: 12),
         _buildSettingItem(
           context,
@@ -583,7 +434,7 @@ class ProfileScreen extends StatelessWidget {
           color: Colors.red,
         ),
       ],
-    );
+    ).animate().fadeIn(delay: 400.ms, duration: 600.ms);
   }
 
   Widget _buildSettingItem(
@@ -642,6 +493,43 @@ class ProfileScreen extends StatelessWidget {
           child: const Text('Logout'),
         ),
       ],
+    );
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.backgroundDark,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('About Aura 3', style: TextStyle(color: AppColors.textPrimary)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Version 3.0.0',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'A liquid glass themed ASMR and meditation app designed to help you relax, focus, and find inner peace.',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              '© 2025 Aura 3',
+              style: TextStyle(color: AppColors.textTertiary, fontSize: 12),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 }

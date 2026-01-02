@@ -1,103 +1,86 @@
-import 'package:aura3/features/sounds/providers/sound_provider.dart';
 import 'package:flutter/foundation.dart';
-import '../../../core/services/storage_service.dart';
 import '../../../core/models/sound.dart';
+import '../../sounds/providers/sound_provider.dart';
+import '../../library/providers/playlist_provider.dart';
 
 class FavoritesProvider extends ChangeNotifier {
-  final StorageService _storage = storageService;
-  SoundProvider? _soundProvider; // Will be updated by a ProxyProvider
+  SoundProvider? _soundProvider;
+  PlaylistProvider? _playlistProvider;
 
-  List<String> _favoriteIds = [];
-  List<String> _recentlyPlayedIds = [];
   bool _isLoading = false;
 
-  List<String> get favoriteIds => _favoriteIds;
-  List<String> get recentlyPlayedIds => _recentlyPlayedIds;
   bool get isLoading => _isLoading;
 
-  FavoritesProvider() {
-    _loadData();
-  }
+  FavoritesProvider();
 
-  // Called by the ProxyProvider in main.dart to link the providers
-  void updateDependencies(SoundProvider soundProvider) {
+  // Called by ProxyProvider to link providers
+  void updateDependencies(
+      SoundProvider soundProvider,
+      PlaylistProvider playlistProvider,
+      ) {
     _soundProvider = soundProvider;
+    _playlistProvider = playlistProvider;
   }
 
-  Future<void> _loadData() async {
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      _favoriteIds = await _storage.getFavorites();
-      _recentlyPlayedIds = await _storage.getRecentlyPlayed();
-    } catch (e) {
-      debugPrint('Error loading favorites: $e');
-    }
-
-    _isLoading = false;
-    notifyListeners();
-  }
-
+  // Check if sound is favorited
   bool isFavorite(String soundId) {
-    return _favoriteIds.contains(soundId);
+    if (_playlistProvider == null) return false;
+    return _playlistProvider!.isInFavorites(soundId);
   }
 
+  // Toggle favorite
   Future<void> toggleFavorite(String soundId) async {
+    if (_playlistProvider == null) return;
+
     try {
-      await _storage.toggleFavorite(soundId);
-
-      if (_favoriteIds.contains(soundId)) {
-        _favoriteIds.remove(soundId);
+      if (isFavorite(soundId)) {
+        await _playlistProvider!.removeFromFavorites(soundId);
+        debugPrint('Removed from favorites: $soundId');
       } else {
-        _favoriteIds.add(soundId);
+        await _playlistProvider!.addToFavorites(soundId);
+        debugPrint('Added to favorites: $soundId');
       }
-
       notifyListeners();
     } catch (e) {
       debugPrint('Error toggling favorite: $e');
     }
   }
 
+  // Add to recently played
   Future<void> addRecentlyPlayed(String soundId) async {
+    if (_playlistProvider == null) return;
+
     try {
-      await _storage.addRecentlyPlayed(soundId);
-
-      _recentlyPlayedIds.remove(soundId);
-      _recentlyPlayedIds.insert(0, soundId);
-
-      if (_recentlyPlayedIds.length > 20) {
-        _recentlyPlayedIds.removeRange(20, _recentlyPlayedIds.length);
-      }
-
+      await _playlistProvider!.addToRecentlyPlayed(soundId);
       notifyListeners();
     } catch (e) {
       debugPrint('Error adding recently played: $e');
     }
   }
 
-  // CORRECTED: No longer needs BuildContext
+  // Get favorite sounds
   List<Sound> getFavoriteSounds() {
-    if (_soundProvider == null) return [];
-    return _soundProvider!.sounds
-        .where((sound) => _favoriteIds.contains(sound.id))
-        .toList();
+    if (_soundProvider == null || _playlistProvider == null) return [];
+    return _playlistProvider!.getSoundsForPlaylist('favorites');
   }
 
-  // CORRECTED: No longer needs BuildContext
+  // Get recently played sounds
   List<Sound> getRecentlyPlayedSounds() {
-    if (_soundProvider == null) return [];
-    return _recentlyPlayedIds
-        .map((id) => _soundProvider!.getSoundById(id))
-        .where((sound) => sound != null)
-        .cast<Sound>()
-        .toList();
+    if (_soundProvider == null || _playlistProvider == null) return [];
+    return _playlistProvider!.getSoundsForPlaylist('recently_played');
   }
 
+  // Clear favorites
   Future<void> clearFavorites() async {
+    if (_playlistProvider == null) return;
+
     try {
-      await _storage.clearFavorites();
-      _favoriteIds.clear();
+      final favorites = _playlistProvider!.favoritesPlaylist;
+      if (favorites != null) {
+        for (final soundId in [...favorites.soundIds]) {
+          await _playlistProvider!.removeFromFavorites(soundId);
+        }
+      }
       notifyListeners();
     } catch (e) {
       debugPrint('Error clearing favorites: $e');
@@ -105,6 +88,7 @@ class FavoritesProvider extends ChangeNotifier {
   }
 
   Future<void> reload() async {
-    await _loadData();
+    // Playlists are managed by PlaylistProvider
+    notifyListeners();
   }
 }

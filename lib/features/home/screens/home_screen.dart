@@ -447,7 +447,11 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => PlayerScreen(sound: sound),
+                builder: (_) =>
+                  PlayerScreen(
+                    playlist: [sound],  // or the appropriate playlist
+                    initialIndex: 0,
+                  )
               ),
             );
           },

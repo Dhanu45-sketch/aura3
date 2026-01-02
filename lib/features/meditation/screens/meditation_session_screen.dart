@@ -432,7 +432,10 @@ class MeditationSessionScreen extends StatelessWidget {
                           if (sound != null) {
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => PlayerScreen(sound: sound),
+                                builder: (_) => PlayerScreen(
+                                  playlist: [sound],
+                                  initialIndex: 0,
+                                ),
                               ),
                             );
                           }

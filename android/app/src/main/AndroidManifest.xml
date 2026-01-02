@@ -11,6 +11,13 @@
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
 
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false"/>
+
+    <!-- NEW: Sensor permissions -->
+    <uses-permission android:name="android.permission.BODY_SENSORS"/>
+    <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS"/>
+
+
     <application
         android:label="aura3"
         android:icon="@mipmap/ic_launcher">
@@ -40,3 +47,6 @@
             android:value="2" />
     </application>
 </manifest>
+
+
+

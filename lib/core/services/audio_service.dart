@@ -1,13 +1,15 @@
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-// CORRECTED: Importing the full foundation library to include debugPrint.
 import 'package:flutter/foundation.dart';
 import 'dart:io' show Platform;
 import '../models/sound.dart';
+import '../services/download_service.dart';
 
 class AudioPlayerService {
   final AudioPlayer _player = AudioPlayer();
+  final DownloadService _downloadService = downloadService;
+
   Sound? _currentSound;
   bool _isInitialized = false;
 
@@ -41,15 +43,30 @@ class AudioPlayerService {
     }
   }
 
-  // Load and play sound
+  // Load and play sound - CHECK LOCAL FIRST
   Future<void> playSound(Sound sound) async {
     try {
       await initialize();
       _currentSound = sound;
 
+      // PRIORITY 1: Check if downloaded locally
+      final localPath = await _downloadService.getLocalFilePath(sound);
+
+      if (localPath != null) {
+        debugPrint('🎵 Playing from LOCAL storage: $localPath');
+        await _player.setFilePath(localPath);
+        await _player.play();
+        return;
+      }
+
+      debugPrint('🌐 Playing from FIREBASE storage (not downloaded)');
+
+      // PRIORITY 2: Play from local asset
       if (sound.localAssetPath != null) {
         await _player.setAsset(sound.localAssetPath!);
-      } else if (sound.firebaseStoragePath != null) {
+      }
+      // PRIORITY 3: Stream from Firebase Storage
+      else if (sound.firebaseStoragePath != null) {
         if (sound.firebaseStoragePath!.startsWith('http')) {
           await _player.setUrl(sound.firebaseStoragePath!);
         } else {

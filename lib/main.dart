@@ -1,3 +1,5 @@
+import 'package:aura3/features/library/providers/download_provider.dart';
+import 'package:aura3/features/library/providers/playlist_provider.dart';
 import 'package:aura3/features/sounds/providers/sound_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -49,11 +51,40 @@ class Aura3App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // Auth
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+
+        // Sounds
+        ChangeNotifierProvider(create: (_) => SoundProvider()),
+
+        // Playlists (depends on SoundProvider)
+        ChangeNotifierProxyProvider<SoundProvider, PlaylistProvider>(
+          create: (_) => PlaylistProvider(),
+          update: (_, soundProvider, playlistProvider) {
+            playlistProvider!.updateDependencies(soundProvider);
+            return playlistProvider;
+          },
+        ),
+
+        // Audio
         ChangeNotifierProvider(create: (_) => AudioProvider()),
-        ChangeNotifierProvider(create: (_) => FavoritesProvider()),
+
+        // Downloads
+        ChangeNotifierProvider(create: (_) => DownloadProvider()),
+
+        // Favorites (depends on SoundProvider and PlaylistProvider)
+        ChangeNotifierProxyProvider2<SoundProvider, PlaylistProvider, FavoritesProvider>(
+          create: (_) => FavoritesProvider(),
+          update: (_, soundProvider, playlistProvider, favoritesProvider) {
+            favoritesProvider!.updateDependencies(soundProvider, playlistProvider);
+            return favoritesProvider;
+          },
+        ),
+
+        // Preferences
         ChangeNotifierProvider(create: (_) => PreferencesProvider()),
-        ChangeNotifierProvider(create: (_) => SoundProvider()), // Added SoundProvider
+
+        // Meditation
         ChangeNotifierProvider(create: (_) => MeditationProvider()),
       ],
       child: Consumer<PreferencesProvider>(
