@@ -274,7 +274,6 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
       List<Sound> sounds,
       SoundProvider soundProvider,
       ) {
-    // Filter by search query
     final filteredSounds = _searchQuery.isEmpty
         ? sounds
         : sounds.where((sound) {
@@ -308,17 +307,38 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: filteredSounds.length,
-      itemBuilder: (context, index) {
-        final sound = filteredSounds[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _buildSoundCard(context, sound, index, filteredSounds),
-        );
-      },
-    );
+    // NEW: Check orientation
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    if (isLandscape) {
+      // NEW: LANDSCAPE - 2-column grid
+      return GridView.builder(
+        padding: const EdgeInsets.all(16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 2.5, // Wide cards in landscape
+        ),
+        itemCount: filteredSounds.length,
+        itemBuilder: (context, index) {
+          return _buildSoundCard(context, filteredSounds[index], index, filteredSounds);
+        },
+      );
+    } else {
+      // ORIGINAL: PORTRAIT - Single column list
+      return ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: filteredSounds.length,
+        itemBuilder: (context, index) {
+          final sound = filteredSounds[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _buildSoundCard(context, sound, index, filteredSounds),
+          );
+        },
+      );
+    }
   }
 
   Widget _buildSoundCard(BuildContext context, Sound sound, int index, List<Sound> filteredSounds) {

@@ -18,6 +18,8 @@ class MeditationSessionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -57,20 +59,18 @@ class MeditationSessionScreen extends StatelessWidget {
                           style: Theme.of(context).textTheme.headlineMedium,
                         ),
                         const SizedBox(height: 16),
-                        ...program.sessions.map(
-                              (session) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _buildSessionCard(
-                              context,
-                              session,
-                              completedDay,
-                              meditationProvider,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 100),
                       ]),
                     ),
+                  ),
+                  // RESPONSIVE: Grid or List based on orientation
+                  _buildResponsiveSessionCards(
+                    context,
+                    completedDay,
+                    meditationProvider,
+                    isLandscape,
+                  ),
+                  const SliverPadding(
+                    padding: EdgeInsets.only(bottom: 100),
                   ),
                 ],
               );
@@ -79,6 +79,63 @@ class MeditationSessionScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // RESPONSIVE: Build grid for landscape, list for portrait
+  Widget _buildResponsiveSessionCards(
+      BuildContext context,
+      int completedDay,
+      MeditationProvider provider,
+      bool isLandscape,
+      ) {
+    if (isLandscape) {
+      // LANDSCAPE: 2-column grid
+      return SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        sliver: SliverGrid(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 2.0, // Wider cards in landscape
+          ),
+          delegate: SliverChildBuilderDelegate(
+                (context, index) {
+              final session = program.sessions[index];
+              return _buildSessionCard(
+                context,
+                session,
+                completedDay,
+                provider,
+              );
+            },
+            childCount: program.sessions.length,
+          ),
+        ),
+      );
+    } else {
+      // PORTRAIT: Single column list
+      return SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+                (context, index) {
+              final session = program.sessions[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildSessionCard(
+                  context,
+                  session,
+                  completedDay,
+                  provider,
+                ),
+              );
+            },
+            childCount: program.sessions.length,
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildProgramHeader(
@@ -268,6 +325,8 @@ class MeditationSessionScreen extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: isNext ? FontWeight.bold : FontWeight.normal,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Row(
@@ -327,12 +386,15 @@ class MeditationSessionScreen extends StatelessWidget {
       MeditationSession session,
       MeditationProvider provider,
       ) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final maxHeight = screenHeight * 0.75;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.75,
+        height: maxHeight,
         margin: const EdgeInsets.all(16),
         child: GlassContainer(
           padding: const EdgeInsets.all(24),
@@ -371,6 +433,8 @@ class MeditationSessionScreen extends StatelessWidget {
                         Text(
                           session.title,
                           style: Theme.of(context).textTheme.titleLarge,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
@@ -382,8 +446,10 @@ class MeditationSessionScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
+              // SCROLLABLE CONTENT with ConstrainedBox pattern
               Expanded(
                 child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

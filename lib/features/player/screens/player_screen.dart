@@ -1,3 +1,6 @@
+// lib/features/player/screens/player_screen.dart
+// CAREFULLY UPDATED: Added responsive layout while preserving ALL existing functionality
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -13,11 +16,10 @@ import '../../library/providers/favorites_provider.dart';
 import '../../profile/providers/preferences_provider.dart';
 import '../../library/providers/download_provider.dart';
 
-
 class PlayerScreen extends StatefulWidget {
   final List<Sound> playlist;
   final int initialIndex;
-  final String? playlistId; // Optional playlist ID for display
+  final String? playlistId;
 
   const PlayerScreen({
     super.key,
@@ -35,7 +37,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   bool _hasStartedPlaying = false;
   late int _currentIndex;
 
-  // Shake detection variables
+  // Shake detection variables (PRESERVED)
   StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
   DateTime? _lastShakeTime;
   static const double _shakeThreshold = 15.0;
@@ -64,14 +66,12 @@ class _PlayerScreenState extends State<PlayerScreen> {
     final audioProvider = context.read<AudioProvider>();
     final favoritesProvider = context.read<FavoritesProvider>();
 
-    // Play sound with full playlist context
     audioProvider.playSound(
       _currentSound,
       playlistId: widget.playlistId,
       playlist: widget.playlist,
     );
 
-    // Add to recently played
     favoritesProvider.addRecentlyPlayed(_currentSound.id);
   }
 
@@ -194,6 +194,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     final elementColor = AppColors.getElementColor(_currentSound.element);
     final elementSolidColor = AppColors.getElementSolidColor(_currentSound.element);
@@ -297,25 +298,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
                   return Stack(
                     children: [
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 20),
-                            _buildArtwork(elementSolidColor),
-                            const SizedBox(height: 40),
-                            _buildSoundInfo(elementSolidColor),
-                            const SizedBox(height: 40),
-                            _buildProgressBar(audioProvider, elementSolidColor),
-                            const SizedBox(height: 40),
-                            _buildControls(audioProvider, elementSolidColor),
-                            const SizedBox(height: 32),
-                            _buildVolumeControl(audioProvider),
-                            const SizedBox(height: 20),
-                            _buildShakeHint(),
-                          ],
-                        ),
-                      ),
+                      isLandscape
+                          ? _buildLandscapeLayout(audioProvider, elementSolidColor)
+                          : _buildPortraitLayout(audioProvider, elementSolidColor),
 
                       if (audioProvider.isLoading)
                         Container(
@@ -360,7 +345,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               Icon(
                                 Icons.skip_next_rounded,
                                 size: 64,
-                                color: elementSolidColor,
+                                color: AppColors.getElementSolidColor(_currentSound.element),
                               ),
                               const SizedBox(height: 16),
                               Text(
@@ -384,13 +369,78 @@ class _PlayerScreenState extends State<PlayerScreen> {
     );
   }
 
-  Widget _buildArtwork(Color elementSolidColor) {
+  Widget _buildPortraitLayout(AudioProvider audioProvider, Color elementSolidColor) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          const SizedBox(height: 20),
+          _buildArtwork(elementSolidColor),
+          const SizedBox(height: 40),
+          _buildSoundInfo(elementSolidColor),
+          const SizedBox(height: 40),
+          _buildProgressBar(audioProvider, elementSolidColor),
+          const SizedBox(height: 40),
+          _buildControls(audioProvider, elementSolidColor),
+          const SizedBox(height: 32),
+          _buildVolumeControl(audioProvider),
+          const SizedBox(height: 20),
+          _buildShakeHint(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLandscapeLayout(AudioProvider audioProvider, Color elementSolidColor) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final maxScrollHeight = screenHeight * 0.7;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: _buildArtwork(elementSolidColor, size: 200),
+            ),
+          ),
+        ),
+        Expanded(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: maxScrollHeight,
+            ),
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildSoundInfo(elementSolidColor),
+                  const SizedBox(height: 24),
+                  _buildProgressBar(audioProvider, elementSolidColor),
+                  const SizedBox(height: 24),
+                  _buildControls(audioProvider, elementSolidColor),
+                  const SizedBox(height: 20),
+                  _buildVolumeControl(audioProvider),
+                  const SizedBox(height: 16),
+                  _buildShakeHint(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildArtwork(Color elementSolidColor, {double size = 280}) {
     return Hero(
       tag: 'sound_${_currentSound.id}',
       child: GlassContainer(
         padding: const EdgeInsets.all(0),
-        width: 280,
-        height: 280,
+        width: size,
+        height: size,
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
@@ -406,7 +456,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
           child: Center(
             child: Icon(
               _getElementIcon(_currentSound.element),
-              size: 120,
+              size: size * 0.43,
               color: Colors.white,
             ),
           ),
@@ -417,11 +467,14 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   Widget _buildSoundInfo(Color elementSolidColor) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           _currentSound.title,
           style: Theme.of(context).textTheme.displaySmall,
           textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ).animate().fadeIn(delay: 200.ms),
         const SizedBox(height: 8),
         Text(
@@ -430,31 +483,37 @@ class _PlayerScreenState extends State<PlayerScreen> {
             color: AppColors.textSecondary,
           ),
           textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ).animate().fadeIn(delay: 300.ms),
         const SizedBox(height: 16),
-        GlassContainer(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                _getElementIcon(_currentSound.element),
-                size: 20,
-                color: elementSolidColor,
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GlassContainer(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _getElementIcon(_currentSound.element),
+                    size: 20,
+                    color: elementSolidColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    _currentSound.element.toUpperCase(),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: elementSolidColor,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Text(
-                _currentSound.element.toUpperCase(),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: elementSolidColor,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildPlaybackSourceIndicator(),
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+            const SizedBox(width: 12),
+            _buildPlaybackSourceIndicator(),
+          ],
         ).animate().fadeIn(delay: 400.ms),
       ],
     );
@@ -472,6 +531,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
         }
 
         return Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             GlassContainer(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
@@ -525,8 +585,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
     return GlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Playlist info
           if (widget.playlistId != null || widget.playlist.length > 1) ...[
             Text(
               widget.playlistId != null
@@ -545,7 +605,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
             ),
             const SizedBox(height: 16),
           ],
-          // Controls
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -641,6 +700,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
     return GlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             Icons.volume_down_rounded,
@@ -697,6 +757,37 @@ class _PlayerScreenState extends State<PlayerScreen> {
     ).animate(
       onPlay: (controller) => controller.repeat(reverse: true),
     ).fadeIn(duration: 1500.ms);
+  }
+
+  Widget _buildPlaybackSourceIndicator() {
+    return FutureBuilder<String?>(
+      future: context.read<DownloadProvider>().getLocalFilePath(_currentSound),
+      builder: (context, snapshot) {
+        final isLocal = snapshot.data != null;
+
+        return GlassContainer(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isLocal ? Icons.phone_android_rounded : Icons.cloud_rounded,
+                size: 16,
+                color: isLocal ? Colors.green : AppColors.primaryGlass,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                isLocal ? 'Playing Offline' : 'Streaming',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: isLocal ? Colors.green : AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void _showPlaylistDialog(BuildContext context) {
@@ -844,37 +935,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
       default:
         return 'Playlist';
     }
-  }
-
-  Widget _buildPlaybackSourceIndicator() {
-    return FutureBuilder<String?>(
-      future: context.read<DownloadProvider>().getLocalFilePath(_currentSound),
-      builder: (context, snapshot) {
-        final isLocal = snapshot.data != null;
-
-        return GlassContainer(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                isLocal ? Icons.phone_android_rounded : Icons.cloud_rounded,
-                size: 16,
-                color: isLocal ? Colors.green : AppColors.primaryGlass,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                isLocal ? 'Playing Offline' : 'Streaming',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: isLocal ? Colors.green : AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   IconData _getElementIcon(String element) {

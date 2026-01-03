@@ -1,6 +1,7 @@
 import 'package:aura3/core/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../core/widgets/glass_container.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -70,6 +71,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final authProvider = context.watch<AuthProvider>();
     final prefsProvider = context.watch<PreferencesProvider>();
     final user = authProvider.user;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -91,133 +93,192 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 20),
-                  _buildProfilePictureSection(prefsProvider, user?.uid ?? ''),
-                  const SizedBox(height: 32),
-                  _buildNameField(),
-                  const SizedBox(height: 16),
-                  _buildEmailField(user?.email ?? ''),
-                  const SizedBox(height: 32),
-                  _buildSaveButton(),
-                  const SizedBox(height: 16),
-                  _buildDeleteAccountButton(authProvider),
-                ],
-              ),
-            ),
-          ),
+          child: isLandscape
+              ? _buildLandscapeLayout(prefsProvider, user, authProvider)
+              : _buildPortraitLayout(prefsProvider, user, authProvider),
         ),
       ),
     );
   }
 
+  // PORTRAIT: Vertical scroll
+  Widget _buildPortraitLayout(
+      PreferencesProvider prefsProvider,
+      dynamic user,
+      AuthProvider authProvider,
+      ) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 20),
+            _buildProfilePictureSection(prefsProvider, user?.uid ?? ''),
+            const SizedBox(height: 32),
+            _buildNameField(),
+            const SizedBox(height: 16),
+            _buildEmailField(user?.email ?? ''),
+            const SizedBox(height: 32),
+            _buildSaveButton(),
+            const SizedBox(height: 16),
+            _buildDeleteAccountButton(authProvider),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // LANDSCAPE: Two-column with scrollable form
+  Widget _buildLandscapeLayout(
+      PreferencesProvider prefsProvider,
+      dynamic user,
+      AuthProvider authProvider,
+      ) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final maxScrollHeight = screenHeight * 0.7;
+
+    return Row(
+      children: [
+        // LEFT: Profile picture section
+        Expanded(
+          child: Center(
+            child: _buildProfilePictureSection(prefsProvider, user?.uid ?? ''),
+          ),
+        ),
+        // RIGHT: Form fields (scrollable)
+        Expanded(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: maxScrollHeight,
+            ),
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildNameField(),
+                    const SizedBox(height: 16),
+                    _buildEmailField(user?.email ?? ''),
+                    const SizedBox(height: 32),
+                    _buildSaveButton(),
+                    const SizedBox(height: 16),
+                    _buildDeleteAccountButton(authProvider),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildProfilePictureSection(PreferencesProvider prefsProvider, String userId) {
-    return Center(
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: () => _showImagePickerOptions(prefsProvider, userId),
-            child: Stack(
-              children: [
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: prefsProvider.profilePictureUrl == null
-                        ? LinearGradient(
-                      colors: [
-                        AppColors.primaryGlass,
-                        AppColors.accentGlass,
-                      ],
-                    )
-                        : null,
-                    image: prefsProvider.profilePictureUrl != null
-                        ? DecorationImage(
-                      image: NetworkImage(prefsProvider.profilePictureUrl!),
-                      fit: BoxFit.cover,
-                    )
-                        : null,
-                  ),
-                  child: prefsProvider.isUploadingImage
-                      ? const Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: () => _showImagePickerOptions(prefsProvider, userId),
+          child: Stack(
+            children: [
+              Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: prefsProvider.profilePictureUrl == null
+                      ? LinearGradient(
+                    colors: [
+                      AppColors.primaryGlass,
+                      AppColors.accentGlass,
+                    ],
                   )
-                      : prefsProvider.profilePictureUrl == null
-                      ? Center(
-                    child: Text(
-                      _nameController.text.isNotEmpty
-                          ? _nameController.text.substring(0, 1).toUpperCase()
-                          : 'U',
-                      style: const TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
+                      : null,
+                  image: prefsProvider.profilePictureUrl != null
+                      ? DecorationImage(
+                    image: NetworkImage(prefsProvider.profilePictureUrl!),
+                    fit: BoxFit.cover,
                   )
                       : null,
                 ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryGlass,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.backgroundDark,
-                        width: 3,
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.camera_alt_rounded,
-                      size: 20,
+                child: prefsProvider.isUploadingImage
+                    ? const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+                    : prefsProvider.profilePictureUrl == null
+                    ? Center(
+                  child: Text(
+                    _nameController.text.isNotEmpty
+                        ? _nameController.text.substring(0, 1).toUpperCase()
+                        : 'U',
+                    style: const TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          TextButton.icon(
-            onPressed: () => _showImagePickerOptions(prefsProvider, userId),
-            icon: const Icon(Icons.edit_rounded),
-            label: const Text('Change Photo'),
-          ),
-          if (prefsProvider.profilePictureUrl != null)
-            TextButton.icon(
-              onPressed: () async {
-                final success = await prefsProvider.removeProfilePicture();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        success
-                            ? 'Profile picture removed'
-                            : 'Failed to remove picture',
-                      ),
-                      backgroundColor: success ? Colors.green : Colors.red,
-                      behavior: SnackBarBehavior.floating,
+                )
+                    : null,
+              ),
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGlass,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.backgroundDark,
+                      width: 3,
                     ),
-                  );
-                }
-              },
-              icon: const Icon(Icons.delete_rounded, color: Colors.red),
-              label: const Text('Remove Photo', style: TextStyle(color: Colors.red)),
-            ),
-        ],
-      ),
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt_rounded,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ).animate().scale(duration: 600.ms),
+        const SizedBox(height: 16),
+        TextButton.icon(
+          onPressed: () => _showImagePickerOptions(prefsProvider, userId),
+          icon: const Icon(Icons.edit_rounded),
+          label: const Text('Change Photo'),
+        ),
+        if (prefsProvider.profilePictureUrl != null)
+          TextButton.icon(
+            onPressed: () async {
+              final success = await prefsProvider.removeProfilePicture();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'Profile picture removed'
+                          : 'Failed to remove picture',
+                    ),
+                    backgroundColor: success ? Colors.green : Colors.red,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.delete_rounded, color: Colors.red),
+            label: const Text('Remove Photo', style: TextStyle(color: Colors.red)),
+          ),
+      ],
     );
   }
 
@@ -296,6 +357,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             'Display Name',
@@ -324,7 +386,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         ],
       ),
-    );
+    ).animate().fadeIn(delay: 200.ms);
   }
 
   Widget _buildEmailField(String email) {
@@ -332,6 +394,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             'Email',
@@ -365,7 +428,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
         ],
       ),
-    );
+    ).animate().fadeIn(delay: 300.ms);
   }
 
   Widget _buildSaveButton() {
@@ -391,7 +454,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'Save Changes',
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
-    );
+    ).animate().fadeIn(delay: 400.ms);
   }
 
   Widget _buildDeleteAccountButton(AuthProvider authProvider) {
@@ -459,6 +522,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           borderRadius: BorderRadius.circular(16),
         ),
       ),
-    );
+    ).animate().fadeIn(delay: 500.ms);
   }
 }

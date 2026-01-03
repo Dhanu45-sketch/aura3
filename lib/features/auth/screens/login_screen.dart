@@ -91,6 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     return Scaffold(
       body: Container(
@@ -120,20 +121,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
               return Stack(
                 children: [
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 40),
-                        _buildLogo(),
-                        const SizedBox(height: 60),
-                        _buildLoginForm(),
-                        const SizedBox(height: 24),
-                        _buildRegisterPrompt(),
-                      ],
-                    ),
-                  ),
+                  // RESPONSIVE: Different layouts for landscape/portrait
+                  isLandscape
+                      ? _buildLandscapeLayout()
+                      : _buildPortraitLayout(),
+
+                  // Loading overlay
                   if (authProvider.isLoading)
                     Container(
                       color: Colors.black.withAlpha(128),
@@ -157,20 +150,77 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // PORTRAIT: Vertical layout (original)
+  Widget _buildPortraitLayout() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 40),
+          _buildLogo(),
+          const SizedBox(height: 60),
+          _buildLoginForm(),
+          const SizedBox(height: 24),
+          _buildRegisterPrompt(),
+        ],
+      ),
+    );
+  }
+
+  // LANDSCAPE: Horizontal two-column layout
+  Widget _buildLandscapeLayout() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final maxScrollHeight = screenHeight * 0.7;
+
+    return Row(
+      children: [
+        // LEFT: Logo section
+        Expanded(
+          child: Center(
+            child: _buildLogo(),
+          ),
+        ),
+        // RIGHT: Form section (scrollable)
+        Expanded(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: maxScrollHeight,
+            ),
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildLoginForm(),
+                  const SizedBox(height: 24),
+                  _buildRegisterPrompt(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildLogo() {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Image.asset(
-          'assets/images/aura_logo.png', // CORRECTED: Using your logo
+          'assets/images/aura_logo.png',
           height: 120,
         ).animate().fadeIn(duration: 600.ms).scale(),
         const SizedBox(height: 24),
         Text(
           'Aura 3',
           style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-              ),
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2,
+          ),
         )
             .animate()
             .fadeIn(delay: 200.ms, duration: 600.ms)
@@ -179,8 +229,8 @@ class _LoginScreenState extends State<LoginScreen> {
         Text(
           'Find Your Inner Peace',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+            color: AppColors.textSecondary,
+          ),
         )
             .animate()
             .fadeIn(delay: 400.ms, duration: 600.ms),
@@ -193,6 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             'Welcome Back',

@@ -15,6 +15,7 @@ class ProfileScreen extends StatelessWidget {
     final authProvider = context.watch<AuthProvider>();
     final prefsProvider = context.watch<PreferencesProvider>();
     final user = authProvider.user;
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     return Scaffold(
       body: Container(
@@ -37,24 +38,93 @@ class ProfileScreen extends StatelessWidget {
                 backgroundColor: Colors.transparent,
                 title: const Text('Profile'),
               ),
-              SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
+              // RESPONSIVE: Different layouts for landscape/portrait
+              if (isLandscape)
+                _buildLandscapeLayout(context, user, prefsProvider, authProvider)
+              else
+                _buildPortraitLayout(context, user, prefsProvider, authProvider),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // PORTRAIT: Single column (original layout)
+  Widget _buildPortraitLayout(
+      BuildContext context,
+      dynamic user,
+      PreferencesProvider prefsProvider,
+      AuthProvider authProvider,
+      ) {
+    return SliverPadding(
+      padding: const EdgeInsets.all(16),
+      sliver: SliverList(
+        delegate: SliverChildListDelegate([
+          _buildProfileHeader(context, user?.displayName, user?.email, prefsProvider),
+          const SizedBox(height: 24),
+          _buildStatsGrid(context, prefsProvider),
+          const SizedBox(height: 24),
+          _buildSettingsSection(context, prefsProvider),
+          const SizedBox(height: 24),
+          _buildAccountSection(context, authProvider),
+          const SizedBox(height: 100),
+        ]),
+      ),
+    );
+  }
+
+  // LANDSCAPE: Two-column layout for better space usage
+  Widget _buildLandscapeLayout(
+      BuildContext context,
+      dynamic user,
+      PreferencesProvider prefsProvider,
+      AuthProvider authProvider,
+      ) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final maxScrollHeight = screenHeight * 0.7; // 70% of screen height
+
+    return SliverPadding(
+      padding: const EdgeInsets.all(16),
+      sliver: SliverList(
+        delegate: SliverChildListDelegate([
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // LEFT COLUMN: Profile & Stats
+              Expanded(
+                child: Column(
+                  children: [
                     _buildProfileHeader(context, user?.displayName, user?.email, prefsProvider),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     _buildStatsGrid(context, prefsProvider),
-                    const SizedBox(height: 24),
-                    _buildSettingsSection(context, prefsProvider),
-                    const SizedBox(height: 24),
-                    _buildAccountSection(context, authProvider),
-                    const SizedBox(height: 100),
-                  ]),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              // RIGHT COLUMN: Settings & Account (Scrollable)
+              Expanded(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: maxScrollHeight,
+                  ),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSettingsSection(context, prefsProvider),
+                        const SizedBox(height: 24),
+                        _buildAccountSection(context, authProvider),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 100),
+        ]),
       ),
     );
   }
@@ -216,24 +286,8 @@ class ProfileScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _buildThemeSelector(context, prefsProvider),
-        const SizedBox(height: 12),
-        _buildToggleSetting(
-          context,
-          icon: Icons.play_circle_outline_rounded,
-          title: 'Auto Play',
-          subtitle: 'Continue playing similar sounds',
-          value: prefsProvider.autoPlay,
-          onChanged: (value) => prefsProvider.setAutoPlay(value),
-        ),
-        const SizedBox(height: 12),
-        _buildToggleSetting(
-          context,
-          icon: Icons.notifications_rounded,
-          title: 'Notifications',
-          subtitle: 'Daily meditation reminders',
-          value: prefsProvider.notificationsEnabled,
-          onChanged: (value) => prefsProvider.setNotificationsEnabled(value),
-        ),
+        // REMOVED: Auto Play toggle (not functional)
+        // REMOVED: Notifications toggle (not functional)
       ],
     ).animate().fadeIn(delay: 300.ms, duration: 600.ms);
   }
@@ -343,45 +397,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildToggleSetting(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required String subtitle,
-        required bool value,
-        required Function(bool) onChanged,
-      }) {
-    return GlassContainer(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.primaryGlass),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                Text(
-                  subtitle,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppColors.primaryGlass,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildAccountSection(BuildContext context, AuthProvider authProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,20 +409,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        _buildSettingItem(
-          context,
-          Icons.help_rounded,
-          'Help & Support',
-              () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Help & Support - Coming soon!'),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 12),
+        // REMOVED: Help & Support (not functional)
         _buildSettingItem(
           context,
           Icons.info_rounded,
