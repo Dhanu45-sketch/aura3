@@ -73,20 +73,13 @@ class MeditationScreen extends StatelessWidget {
                           style: Theme.of(context).textTheme.headlineMedium,
                         ),
                         const SizedBox(height: 16),
-                        ...programs.asMap().entries.map(
-                              (entry) => Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: _buildProgramCard(
-                              context,
-                              entry.value,
-                              meditationProvider,
-                              entry.key,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 100),
                       ]),
                     ),
+                  ),
+                  // RESPONSIVE: Grid or List based on orientation
+                  _buildResponsiveProgramCards(context, programs, meditationProvider),
+                  const SliverPadding(
+                    padding: EdgeInsets.only(bottom: 100),
                   ),
                 ],
               );
@@ -95,6 +88,62 @@ class MeditationScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // RESPONSIVE: Build grid for landscape, list for portrait
+  Widget _buildResponsiveProgramCards(
+      BuildContext context,
+      List<MeditationProgram> programs,
+      MeditationProvider provider,
+      ) {
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    if (isLandscape) {
+      // LANDSCAPE: 2-column grid
+      return SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        sliver: SliverGrid(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1.3, // Slightly wider cards
+          ),
+          delegate: SliverChildBuilderDelegate(
+                (context, index) {
+              return _buildProgramCard(
+                context,
+                programs[index],
+                provider,
+                index,
+              );
+            },
+            childCount: programs.length,
+          ),
+        ),
+      );
+    } else {
+      // PORTRAIT: Single column list
+      return SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate(
+                (context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: _buildProgramCard(
+                  context,
+                  programs[index],
+                  provider,
+                  index,
+                ),
+              );
+            },
+            childCount: programs.length,
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildWelcomeCard(BuildContext context) {
@@ -156,6 +205,13 @@ class MeditationScreen extends StatelessWidget {
     final completionPercentage = provider.getCompletionPercentage(program.id);
     final completedDay = provider.getCompletedDay(program.id);
     final isCompleted = provider.isProgramCompleted(program.id);
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    // RESPONSIVE: Calculate max height for scrollable content
+    final screenHeight = MediaQuery.of(context).size.height;
+    final maxContentHeight = isLandscape
+        ? screenHeight * 0.35  // 35% in landscape
+        : screenHeight * 0.45; // 45% in portrait
 
     return GestureDetector(
       onTap: () {
@@ -166,153 +222,165 @@ class MeditationScreen extends StatelessWidget {
         );
       },
       child: GlassContainer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: maxContentHeight,
+          ),
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Level badge
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _getLevelColor(program.level).withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: _getLevelColor(program.level),
-                      width: 1,
-                    ),
-                  ),
-                  child: Text(
-                    program.level.toUpperCase(),
-                    style: TextStyle(
-                      color: _getLevelColor(program.level),
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                // Days badge
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGlass.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.calendar_today_rounded,
-                        size: 12,
-                        color: AppColors.primaryGlass,
+                Row(
+                  children: [
+                    // Level badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                      const SizedBox(width: 4),
+                      decoration: BoxDecoration(
+                        color: _getLevelColor(program.level).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: _getLevelColor(program.level),
+                          width: 1,
+                        ),
+                      ),
+                      child: Text(
+                        program.level.toUpperCase(),
+                        style: TextStyle(
+                          color: _getLevelColor(program.level),
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    // Days badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryGlass.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.calendar_today_rounded,
+                            size: 12,
+                            color: AppColors.primaryGlass,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${program.totalDays} days',
+                            style: const TextStyle(
+                              color: AppColors.primaryGlass,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  program.title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  program.description,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  maxLines: isLandscape ? 2 : 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 16),
+                // Progress bar
+                if (completedDay > 0) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: LinearProgressIndicator(
+                            value: completionPercentage,
+                            backgroundColor: AppColors.borderGlass,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              isCompleted
+                                  ? Colors.green
+                                  : AppColors.secondaryGlass,
+                            ),
+                            minHeight: 8,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Text(
-                        '${program.totalDays} days',
-                        style: const TextStyle(
-                          color: AppColors.primaryGlass,
-                          fontSize: 11,
+                        isCompleted
+                            ? 'Completed!'
+                            : 'Day $completedDay/${program.totalDays}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isCompleted
+                              ? Colors.green
+                              : AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              program.title,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              program.description,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 16),
-            // Progress bar
-            if (completedDay > 0) ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: LinearProgressIndicator(
-                        value: completionPercentage,
-                        backgroundColor: AppColors.borderGlass,
-                        valueColor: AlwaysStoppedAnimation<Color>(
+                  const SizedBox(height: 12),
+                ],
+                // Action button
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  MeditationSessionScreen(program: program),
+                            ),
+                          );
+                        },
+                        icon: Icon(
                           isCompleted
-                              ? Colors.green
-                              : AppColors.secondaryGlass,
+                              ? Icons.replay_rounded
+                              : completedDay > 0
+                              ? Icons.play_arrow_rounded
+                              : Icons.start_rounded,
+                          size: 20,
                         ),
-                        minHeight: 8,
+                        label: Text(
+                          isCompleted
+                              ? 'Restart'
+                              : completedDay > 0
+                              ? 'Continue'
+                              : 'Start',
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.secondaryGlass,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    isCompleted
-                        ? 'Completed!'
-                        : 'Day $completedDay/${program.totalDays}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: isCompleted
-                          ? Colors.green
-                          : AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-            ],
-            // Action button
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              MeditationSessionScreen(program: program),
-                        ),
-                      );
-                    },
-                    icon: Icon(
-                      isCompleted
-                          ? Icons.replay_rounded
-                          : completedDay > 0
-                          ? Icons.play_arrow_rounded
-                          : Icons.start_rounded,
-                    ),
-                    label: Text(
-                      isCompleted
-                          ? 'Restart'
-                          : completedDay > 0
-                          ? 'Continue'
-                          : 'Start',
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondaryGlass,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ).animate(delay: (100 * index).ms).fadeIn(duration: 600.ms).slideX(
         begin: 0.2,

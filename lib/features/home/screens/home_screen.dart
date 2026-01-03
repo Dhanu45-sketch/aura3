@@ -128,62 +128,122 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                // Elements List
+                // Elements Grid/List - RESPONSIVE
                 if (!soundProvider.isLoading && soundProvider.errorMessage == null)
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate([
-                        _buildElementCard(
-                          context,
-                          'Earth',
-                          'earth',
-                          AppColors.earthGlass,
-                          AppColors.earthSolid,
-                          soundProvider.getSoundsByElement('earth'),
-                        ).animate(delay: 100.ms).fadeIn().slideX(begin: -0.2),
-
-                        const SizedBox(height: 16),
-
-                        _buildElementCard(
-                          context,
-                          'Fire',
-                          'fire',
-                          AppColors.fireGlass,
-                          AppColors.fireSolid,
-                          soundProvider.getSoundsByElement('fire'),
-                        ).animate(delay: 200.ms).fadeIn().slideX(begin: -0.2),
-
-                        const SizedBox(height: 16),
-
-                        _buildElementCard(
-                          context,
-                          'Water',
-                          'water',
-                          AppColors.waterGlass,
-                          AppColors.waterSolid,
-                          soundProvider.getSoundsByElement('water'),
-                        ).animate(delay: 300.ms).fadeIn().slideX(begin: -0.2),
-
-                        const SizedBox(height: 16),
-
-                        _buildElementCard(
-                          context,
-                          'Wind',
-                          'wind',
-                          AppColors.windGlass,
-                          AppColors.windSolid,
-                          soundProvider.getSoundsByElement('wind'),
-                        ).animate(delay: 400.ms).fadeIn().slideX(begin: -0.2),
-                      ]),
-                    ),
-                  ),
+                  _buildResponsiveElementCards(context, soundProvider),
               ],
             );
           },
         ),
       ),
     );
+  }
+
+  // RESPONSIVE: Build grid for landscape, list for portrait
+  Widget _buildResponsiveElementCards(BuildContext context, SoundProvider soundProvider) {
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+    if (isLandscape) {
+      // LANDSCAPE: 2-column grid
+      return SliverPadding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+        sliver: SliverGrid(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 1.5, // Wider cards in landscape
+          ),
+          delegate: SliverChildListDelegate([
+            _buildElementCard(
+              context,
+              'Earth',
+              'earth',
+              AppColors.earthGlass,
+              AppColors.earthSolid,
+              soundProvider.getSoundsByElement('earth'),
+            ).animate(delay: 100.ms).fadeIn().slideX(begin: -0.2),
+
+            _buildElementCard(
+              context,
+              'Fire',
+              'fire',
+              AppColors.fireGlass,
+              AppColors.fireSolid,
+              soundProvider.getSoundsByElement('fire'),
+            ).animate(delay: 200.ms).fadeIn().slideX(begin: -0.2),
+
+            _buildElementCard(
+              context,
+              'Water',
+              'water',
+              AppColors.waterGlass,
+              AppColors.waterSolid,
+              soundProvider.getSoundsByElement('water'),
+            ).animate(delay: 300.ms).fadeIn().slideX(begin: -0.2),
+
+            _buildElementCard(
+              context,
+              'Wind',
+              'wind',
+              AppColors.windGlass,
+              AppColors.windSolid,
+              soundProvider.getSoundsByElement('wind'),
+            ).animate(delay: 400.ms).fadeIn().slideX(begin: -0.2),
+          ]),
+        ),
+      );
+    } else {
+      // PORTRAIT: Single column list (current layout)
+      return SliverPadding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+        sliver: SliverList(
+          delegate: SliverChildListDelegate([
+            _buildElementCard(
+              context,
+              'Earth',
+              'earth',
+              AppColors.earthGlass,
+              AppColors.earthSolid,
+              soundProvider.getSoundsByElement('earth'),
+            ).animate(delay: 100.ms).fadeIn().slideX(begin: -0.2),
+
+            const SizedBox(height: 16),
+
+            _buildElementCard(
+              context,
+              'Fire',
+              'fire',
+              AppColors.fireGlass,
+              AppColors.fireSolid,
+              soundProvider.getSoundsByElement('fire'),
+            ).animate(delay: 200.ms).fadeIn().slideX(begin: -0.2),
+
+            const SizedBox(height: 16),
+
+            _buildElementCard(
+              context,
+              'Water',
+              'water',
+              AppColors.waterGlass,
+              AppColors.waterSolid,
+              soundProvider.getSoundsByElement('water'),
+            ).animate(delay: 300.ms).fadeIn().slideX(begin: -0.2),
+
+            const SizedBox(height: 16),
+
+            _buildElementCard(
+              context,
+              'Wind',
+              'wind',
+              AppColors.windGlass,
+              AppColors.windSolid,
+              soundProvider.getSoundsByElement('wind'),
+            ).animate(delay: 400.ms).fadeIn().slideX(begin: -0.2),
+          ]),
+        ),
+      );
+    }
   }
 
   Widget _buildAppBar(BuildContext context) {
@@ -304,13 +364,29 @@ class _HomeScreenState extends State<HomeScreen> {
       Color solidColor,
       List<Sound> sounds,
       ) {
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
     final isExpanded = _expandedElement == elementKey;
+
+    // FIXED: Calculate max height for expanded content
+    final screenHeight = MediaQuery.of(context).size.height;
+    final maxExpandedHeight = isLandscape
+        ? screenHeight * 0.4  // 40% of screen in landscape
+        : screenHeight * 0.5; // 50% of screen in portrait
 
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _expandedElement = isExpanded ? null : elementKey;
-        });
+        // CHANGED: Primary tap now plays the entire element playlist
+        if (sounds.isNotEmpty) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => PlayerScreen(
+                playlist: sounds,
+                initialIndex: 0,
+                playlistId: elementKey,
+              ),
+            ),
+          );
+        }
       },
       child: GlassContainer(
         padding: EdgeInsets.zero,
@@ -326,7 +402,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
-                  // Element Icon
+                  // Element Icon - PRESERVED CUSTOM ICONS
                   Container(
                     width: 60,
                     height: 60,
@@ -387,21 +463,28 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  // Expand Icon
-                  AnimatedRotation(
-                    turns: isExpanded ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 300),
-                    child: Icon(
-                      Icons.expand_more_rounded,
-                      color: solidColor,
-                      size: 32,
+                  // CHANGED: Expand/Collapse icon button
+                  IconButton(
+                    icon: AnimatedRotation(
+                      turns: isExpanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 300),
+                      child: Icon(
+                        Icons.expand_more_rounded,
+                        color: solidColor,
+                        size: 32,
+                      ),
                     ),
+                    onPressed: () {
+                      setState(() {
+                        _expandedElement = isExpanded ? null : elementKey;
+                      });
+                    },
                   ),
                 ],
               ),
             ),
 
-            // Expanded Content
+            // Expanded Content - SCROLLABLE Individual Sound Tiles
             AnimatedSize(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
@@ -413,16 +496,30 @@ class _HomeScreenState extends State<HomeScreen> {
                     thickness: 1,
                     color: Colors.white12,
                   ),
-                  ...sounds.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final sound = entry.value;
-                    return _buildSoundTile(
-                      context,
-                      sound,
-                      solidColor,
-                      isLast: index == sounds.length - 1,
-                    );
-                  }).toList(),
+                  // FIXED: Wrap in ConstrainedBox + SingleChildScrollView
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: maxExpandedHeight,
+                    ),
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        children: sounds.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final sound = entry.value;
+                          return _buildSoundTile(
+                            context,
+                            sound,
+                            solidColor,
+                            sounds,
+                            index,
+                            elementKey,
+                            isLast: index == sounds.length - 1,
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
                 ],
               )
                   : const SizedBox.shrink(),
@@ -437,7 +534,10 @@ class _HomeScreenState extends State<HomeScreen> {
       BuildContext context,
       Sound sound,
       Color elementColor,
-      {bool isLast = false}
+      List<Sound> playlist,  // ADDED: Full playlist
+      int soundIndex,         // ADDED: Index in playlist
+      String playlistId,      // ADDED: Playlist ID
+          {bool isLast = false}
       ) {
     return Consumer<FavoritesProvider>(
       builder: (context, favoritesProvider, _) {
@@ -445,13 +545,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
         return InkWell(
           onTap: () {
+            // CHANGED: Pass full playlist with correct index and ID
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) =>
-                  PlayerScreen(
-                    playlist: [sound],  // or the appropriate playlist
-                    initialIndex: 0,
-                  )
+                builder: (_) => PlayerScreen(
+                  playlist: playlist,
+                  initialIndex: soundIndex,
+                  playlistId: playlistId,
+                ),
               ),
             );
           },
