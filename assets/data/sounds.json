@@ -30,16 +30,29 @@
     },
     {
       "id": "fire_001",
-      "title": "Cozy Fireplace",
+      "title": "Large Fire Burning",
       "element": "fire",
-      "description": "Crackling fireplace sounds for warmth and comfort",
-      "durationSeconds": 240,
-      "firebaseStoragePath": "sounds/fire/81801__silencyo__silencyo_cc_fire-in-fireplace_close-up_reverberant2.aiff",
+      "description": "Intense crackling of a large fire, perfect for cozy ambience",
+      "durationSeconds": 210,
+      "firebaseStoragePath": "sounds/fire/483321__craigsmith__r28-02-large-fire-burning.wav",
       "thumbnailUrl": "",
-      "tags": ["fireplace", "cozy", "winter", "warmth"],
+      "tags": ["fire", "burning", "crackling", "warmth"],
       "isPremium": false,
-      "fileSize": "7.5 MB",
-      "format": "AIFF"
+      "fileSize": "4.7 MB",
+      "format": "WAV"
+    },
+    {
+      "id": "fire_002",
+      "title": "Fireplace Flame",
+      "element": "fire",
+      "description": "Gentle fireplace flame ambience for relaxation and warmth",
+      "durationSeconds": 300,
+      "firebaseStoragePath": "sounds/fire/649208__ihaksi__fireplace-flame.wav",
+      "thumbnailUrl": "",
+      "tags": ["fireplace", "flame", "cozy", "relaxation"],
+      "isPremium": false,
+      "fileSize": "14.0 MB",
+      "format": "WAV"
     },
     {
       "id": "water_001",
