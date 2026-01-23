@@ -22,6 +22,10 @@ import 'features/meditation/providers/meditation_provider.dart';
 import 'core/theme/app_colors.dart';
 import 'dart:ui';
 
+// NEW IMPORTS:
+import 'features/weather/providers/weather_provider.dart';
+import 'features/weather/screens/weather_ambience_screen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -53,6 +57,9 @@ class Aura3App extends StatelessWidget {
       providers: [
         // Auth
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        
+        // Weather
+        ChangeNotifierProvider(create: (_) => WeatherProvider()),
 
         // Sounds
         ChangeNotifierProvider(create: (_) => SoundProvider()),
@@ -147,6 +154,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const LibraryScreen(),
+    const WeatherAmbienceScreen(), // NEW: Weather screen
     const MeditationScreen(),
     const ProfileScreen(),
   ];
@@ -199,14 +207,19 @@ class _MainNavigationState extends State<MainNavigation> {
                   index: 1,
                 ),
                 _buildNavItem(
+                  icon: Icons.wb_sunny_rounded, // Weather icon
+                  label: 'Weather',
+                  index: 2,
+                ),
+                _buildNavItem(
                   icon: Icons.self_improvement_rounded,
                   label: 'Meditate',
-                  index: 2,
+                  index: 3,
                 ),
                 _buildNavItem(
                   icon: Icons.person_rounded,
                   label: 'Profile',
-                  index: 3,
+                  index: 4,
                 ),
               ],
             ),
@@ -226,7 +239,7 @@ class _MainNavigationState extends State<MainNavigation> {
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primaryGlass.withAlpha(77)
@@ -250,7 +263,7 @@ class _MainNavigationState extends State<MainNavigation> {
                 color: isSelected
                     ? AppColors.textPrimary
                     : AppColors.textTertiary,
-                fontSize: 11,
+                fontSize: 10, // Reduced font size to fit 5 items
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),

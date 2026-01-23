@@ -1,5 +1,5 @@
 // lib/features/player/screens/player_screen.dart
-// CAREFULLY UPDATED: Added responsive layout while preserving ALL existing functionality
+// UPDATED: Removed DownloadProvider dependency and hardcoded offline status as requested
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,7 +14,6 @@ import '../../../core/widgets/glass_container.dart';
 import '../providers/audio_provider.dart';
 import '../../library/providers/favorites_provider.dart';
 import '../../profile/providers/preferences_provider.dart';
-import '../../library/providers/download_provider.dart';
 
 class PlayerScreen extends StatefulWidget {
   final List<Sound> playlist;
@@ -37,7 +36,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
   bool _hasStartedPlaying = false;
   late int _currentIndex;
 
-  // Shake detection variables (PRESERVED)
   StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
   DateTime? _lastShakeTime;
   static const double _shakeThreshold = 15.0;
@@ -101,8 +99,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
   }
 
   void _onShakeDetected() {
-    debugPrint('Shake detected! Skipping to next track...');
-
     setState(() {
       _showShakeIndicator = true;
     });
@@ -119,26 +115,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   }
 
   void _playNext() {
-    if (!_hasNext) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.info_outline_rounded, color: Colors.white),
-              SizedBox(width: 12),
-              Text('No more tracks in playlist'),
-            ],
-          ),
-          backgroundColor: AppColors.primaryGlass,
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
-      return;
-    }
+    if (!_hasNext) return;
 
     setState(() {
       _currentIndex++;
@@ -154,16 +131,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
   }
 
   void _playPrevious() {
-    if (!_hasPrevious) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Already at first track'),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 1),
-        ),
-      );
-      return;
-    }
+    if (!_hasPrevious) return;
 
     setState(() {
       _currentIndex--;
@@ -232,20 +200,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
               setState(() {
                 _shakeEnabled = !_shakeEnabled;
               });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    _shakeEnabled
-                        ? 'Shake to skip: ON'
-                        : 'Shake to skip: OFF',
-                  ),
-                  duration: const Duration(seconds: 1),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              );
             },
           ),
         ],
@@ -760,33 +714,29 @@ class _PlayerScreenState extends State<PlayerScreen> {
   }
 
   Widget _buildPlaybackSourceIndicator() {
-    return FutureBuilder<String?>(
-      future: context.read<DownloadProvider>().getLocalFilePath(_currentSound),
-      builder: (context, snapshot) {
-        final isLocal = snapshot.data != null;
+    // Assume always downloaded as requested
+    const isLocal = true;
 
-        return GlassContainer(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                isLocal ? Icons.phone_android_rounded : Icons.cloud_rounded,
-                size: 16,
-                color: isLocal ? Colors.green : AppColors.primaryGlass,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                isLocal ? 'Playing Offline' : 'Streaming',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: isLocal ? Colors.green : AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+    return GlassContainer(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.phone_android_rounded,
+            size: 16,
+            color: Colors.green,
           ),
-        );
-      },
+          const SizedBox(width: 8),
+          Text(
+            'Playing Offline',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.green,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

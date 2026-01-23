@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../../core/models/sound.dart';
@@ -5,6 +6,7 @@ import '../../../core/services/audio_service.dart';
 
 class AudioProvider extends ChangeNotifier {
   final AudioPlayerService _audioService = AudioPlayerService();
+  StreamSubscription? _playerStateSubscription;
 
   Sound? _currentSound;
   bool _isLoading = false;
@@ -43,6 +45,13 @@ class AudioProvider extends ChangeNotifier {
 
   Future<void> _initialize() async {
     await _audioService.initialize();
+    
+    // FIXED: Listen for track completion to play the next track automatically
+    _playerStateSubscription = _audioService.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        playNext();
+      }
+    });
   }
 
   // Play sound with playlist context
@@ -201,6 +210,7 @@ class AudioProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _playerStateSubscription?.cancel();
     _audioService.dispose();
     super.dispose();
   }

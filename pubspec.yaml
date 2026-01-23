@@ -31,6 +31,9 @@ dependencies:
   image_picker: ^1.1.2
   image_cropper: ^7.0.5
   cached_network_image: ^3.3.1
+  geolocator: ^11.0.0
+  geocoding: ^3.0.0  # Convert coordinates to city names
+  weather: ^3.1.1    # Weather API wrapper (or use http directly)
 
   # Sensors
   sensors_plus: ^5.0.1
@@ -47,11 +50,35 @@ dependencies:
   http: ^1.2.0
   connectivity_plus: ^5.0.2
 
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
   flutter_launcher_icons: ^0.13.1
+
+  # Testing packages
+  mockito: ^5.4.4              # Mocking framework
+  build_runner: ^2.4.8         # Code generation for mocks
+  integration_test:             # Integration testing
+    sdk: flutter
+  flutter_driver:               # For integration tests
+    sdk: flutter
+  test: ^1.24.9                # Core testing package
+
+  # Additional testing utilities
+  bloc_test: ^9.1.6            # If using BLoC pattern
+  golden_toolkit: ^0.15.0      # For golden/screenshot tests
+  network_image_mock: ^2.1.1   # Mock network images
+  path_provider_platform_interface: ^2.1.1  # Mock path provider
+
+# After adding these, run:
+# flutter pub get
+# flutter pub run build_runner build
+
+# Then generate mocks with:
+# flutter pub run build_runner build --delete-conflicting-outputs
 
 flutter:
   uses-material-design: true

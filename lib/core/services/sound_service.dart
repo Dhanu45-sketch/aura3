@@ -9,7 +9,7 @@ class SoundService {
   // IMPORTANT: Change this to your actual GitHub raw URL after you upload sounds.json
   // Example: 'https://raw.githubusercontent.com/yourusername/yourrepo/main/sounds.json'
   static const String externalJsonUrl =
-      'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/sounds.json';
+      'https://raw.githubusercontent.com/Dhanu45-sketch/aura3/main/assets/data/sounds.json';
 
   static const String localJsonPath = 'assets/data/sounds.json';
 
