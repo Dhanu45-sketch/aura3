@@ -32,7 +32,7 @@ class WeatherData {
   });
 
   factory WeatherData.fromJson(Map<String, dynamic> json, String cityName) {
-    // Helper to safely parse doubles
+
     double toDouble(dynamic val) => (val is int) ? val.toDouble() : (val ?? 0.0);
 
     final main = json['main'] ?? {};
@@ -59,7 +59,7 @@ class WeatherData {
     );
   }
 
-  // Rest of the class remains the same...
+
   static String _getRecommendedElement(String weatherCondition) {
     switch (weatherCondition.toLowerCase()) {
       case 'rain':

@@ -139,12 +139,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // RESPONSIVE: Build grid for landscape, list for portrait
+  // RESPONSIVE
   Widget _buildResponsiveElementCards(BuildContext context, SoundProvider soundProvider) {
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     if (isLandscape) {
-      // LANDSCAPE: 2-column grid
+      // LANDSCAPE
       return SliverPadding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
         sliver: SliverGrid(
@@ -194,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     } else {
-      // PORTRAIT: Single column list (current layout)
+      // PORTRAIT
       return SliverPadding(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
         sliver: SliverList(
@@ -265,7 +265,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            child: const Icon(Icons.waves_rounded, size: 24),
+            child: Image.asset(
+              'assets/images/aura_logo.png',
+              width: 24,
+              height: 24,
+            ) ,
           ),
           const SizedBox(width: 12),
           const Text('Aura'),
@@ -367,7 +371,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
     final isExpanded = _expandedElement == elementKey;
 
-    // FIXED: Calculate max height for expanded content
+
     final screenHeight = MediaQuery.of(context).size.height;
     final maxExpandedHeight = isLandscape
         ? screenHeight * 0.4  // 40% of screen in landscape
@@ -375,7 +379,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return GestureDetector(
       onTap: () {
-        // CHANGED: Primary tap now plays the entire element playlist
         if (sounds.isNotEmpty) {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -402,7 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
-                  // Element Icon - PRESERVED CUSTOM ICONS
+                  // Element Icon
                   Container(
                     width: 60,
                     height: 60,
@@ -463,7 +466,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
 
-                  // CHANGED: Expand/Collapse icon button
+
                   IconButton(
                     icon: AnimatedRotation(
                       turns: isExpanded ? 0.5 : 0,
@@ -496,7 +499,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     thickness: 1,
                     color: Colors.white12,
                   ),
-                  // FIXED: Wrap in ConstrainedBox + SingleChildScrollView
                   ConstrainedBox(
                     constraints: BoxConstraints(
                       maxHeight: maxExpandedHeight,
@@ -534,9 +536,9 @@ class _HomeScreenState extends State<HomeScreen> {
       BuildContext context,
       Sound sound,
       Color elementColor,
-      List<Sound> playlist,  // ADDED: Full playlist
-      int soundIndex,         // ADDED: Index in playlist
-      String playlistId,      // ADDED: Playlist ID
+      List<Sound> playlist,  // Full playlist
+      int soundIndex,         // Index in playlist
+      String playlistId,      // Playlist ID
           {bool isLast = false}
       ) {
     return Consumer<FavoritesProvider>(
@@ -545,7 +547,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
         return InkWell(
           onTap: () {
-            // CHANGED: Pass full playlist with correct index and ID
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => PlayerScreen(

@@ -10,7 +10,7 @@ import 'package:aura3/core/theme/app_theme.dart';
 import '../../mocks/mock_data.dart';
 
 void main() {
-  // FIXED: Use Mock classes for variable types
+
   late MockSoundProvider mockSoundProvider;
   late MockFavoritesProvider mockFavoritesProvider;
 

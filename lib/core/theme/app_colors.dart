@@ -9,7 +9,7 @@ class AppColors {
 
   // Background Colors
   static const backgroundDark = Color(0xFF0F172A); // Slate 900
-  static const backgroundLight = Color(0xFF9E569A); // Slate 50
+  static const backgroundLight = Color(0xFF3A2740); // Dark red
   static const surfaceGlass = Color(0x40FFFFFF); // 25% white for glass effect
 
   // Element Colors (with transparency for glass effect)
@@ -28,7 +28,7 @@ class AppColors {
   static const textPrimary = Color(0xFFFFFFFF);
   static const textSecondary = Color(0xB3FFFFFF); // 70% white
   static const textTertiary = Color(0x80FFFFFF); // 50% white
-  static const textDark = Color(0xFF0F172A);
+  static const textDark = Color(0xFFB0C4FF);
 
   // Border Colors
   static const borderGlass = Color(0x33FFFFFF); // 20% white

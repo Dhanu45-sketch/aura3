@@ -90,7 +90,7 @@ class MeditationScreen extends StatelessWidget {
     );
   }
 
-  // RESPONSIVE: Build grid for landscape, list for portrait
+  // RESPONSIVE
   Widget _buildResponsiveProgramCards(
       BuildContext context,
       List<MeditationProgram> programs,
@@ -99,7 +99,7 @@ class MeditationScreen extends StatelessWidget {
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     if (isLandscape) {
-      // LANDSCAPE: 2-column grid
+      // LANDSCAPE
       return SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         sliver: SliverGrid(
@@ -107,7 +107,7 @@ class MeditationScreen extends StatelessWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
-            childAspectRatio: 1.3, // Slightly wider cards
+            childAspectRatio: 1.3,
           ),
           delegate: SliverChildBuilderDelegate(
                 (context, index) {
@@ -123,7 +123,7 @@ class MeditationScreen extends StatelessWidget {
         ),
       );
     } else {
-      // PORTRAIT: Single column list
+      // PORTRAIT
       return SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         sliver: SliverList(
@@ -207,7 +207,7 @@ class MeditationScreen extends StatelessWidget {
     final isCompleted = provider.isProgramCompleted(program.id);
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
-    // RESPONSIVE: Calculate max height for scrollable content
+    // RESPONSIVE
     final screenHeight = MediaQuery.of(context).size.height;
     final maxContentHeight = isLandscape
         ? screenHeight * 0.35  // 35% in landscape
@@ -372,6 +372,7 @@ class MeditationScreen extends StatelessWidget {
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.secondaryGlass,
+                          foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                       ),

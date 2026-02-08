@@ -22,9 +22,8 @@ class AuthProvider extends ChangeNotifier {
     });
   }
 
-  // --- REFACTORED FOR 2025 STANDARDS (All methods return AuthResult) ---
 
-  /// Sign up with email and password
+  // Sign up with email and password
   Future<AuthResult> signUp({
     required String email,
     required String password,
@@ -54,7 +53,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Sign in with email and password
+  // Sign in with email and password
   Future<AuthResult> signIn({
     required String email,
     required String password,
@@ -82,7 +81,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Sign in with Google (using 2025 handoff logic)
+  // Sign in with Google
   Future<AuthResult> signInWithGoogle() async {
     _setLoading(true);
     _clearError();
@@ -104,7 +103,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Send password reset email
+  // Send password reset email
   Future<AuthResult> sendPasswordResetEmail(String email) async {
     _setLoading(true);
     _clearError();
@@ -126,7 +125,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Update user profile (name or photo)
+  // Update user profile (name or photo)
   Future<AuthResult> updateProfile({
     String? displayName,
     String? photoURL,
@@ -157,7 +156,7 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Completely delete the user account
+  // Completely delete the user account
   Future<AuthResult> deleteAccount() async {
     _setLoading(true);
     _clearError();
@@ -182,9 +181,9 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // --- HELPER & STATE METHODS (Preserved) ---
+  // HELPER & STATE METHODS
 
-  /// Sign out from all providers
+  // Sign out from all providers
   Future<void> signOut() async {
     _setLoading(true);
     _clearError();

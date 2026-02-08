@@ -17,12 +17,9 @@ import 'features/home/screens/home_screen.dart';
 import 'features/library/screens/library_screen.dart';
 import 'features/meditation/screens/meditation_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
-import 'core/widgets/glass_container.dart';
 import 'features/meditation/providers/meditation_provider.dart';
 import 'core/theme/app_colors.dart';
 import 'dart:ui';
-
-// NEW IMPORTS:
 import 'features/weather/providers/weather_provider.dart';
 import 'features/weather/screens/weather_ambience_screen.dart';
 
@@ -154,7 +151,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const LibraryScreen(),
-    const WeatherAmbienceScreen(), // NEW: Weather screen
+    const WeatherAmbienceScreen(),
     const MeditationScreen(),
     const ProfileScreen(),
   ];
@@ -207,7 +204,7 @@ class _MainNavigationState extends State<MainNavigation> {
                   index: 1,
                 ),
                 _buildNavItem(
-                  icon: Icons.wb_sunny_rounded, // Weather icon
+                  icon: Icons.wb_sunny_rounded,
                   label: 'Weather',
                   index: 2,
                 ),

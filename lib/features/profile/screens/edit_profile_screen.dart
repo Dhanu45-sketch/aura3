@@ -435,6 +435,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return ElevatedButton(
       onPressed: _isLoading ? null : _updateProfile,
       style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
         backgroundColor: AppColors.primaryGlass,
         padding: const EdgeInsets.symmetric(vertical: 16),
         shape: RoundedRectangleBorder(
@@ -452,7 +453,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       )
           : const Text(
         'Save Changes',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600 ),
       ),
     ).animate().fadeIn(delay: 400.ms);
   }

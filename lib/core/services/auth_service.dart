@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter/foundation.dart';
 
-// REFINED SEALED CLASS: Added ActionSuccess for non-credential tasks
+
+
 sealed class AuthResult {
   const AuthResult();
 }
@@ -13,7 +13,7 @@ class AuthSuccess extends AuthResult {
   const AuthSuccess(this.user, this.credential);
 }
 
-/// Use this for successful actions that don't return a new user (like password reset)
+
 class ActionSuccess extends AuthResult {
   const ActionSuccess();
 }
@@ -29,7 +29,6 @@ class AuthCanceled extends AuthResult {
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  // CORRECTED: The modern API uses the constructor directly.
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   AuthService();
@@ -37,7 +36,7 @@ class AuthService {
   User? get currentUser => _auth.currentUser;
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // --- SIGN IN / SIGN UP (MODERNIZED) ---
+  // SIGN IN / SIGN UP
 
   Future<AuthResult> signInWithGoogle() async {
     try {
@@ -82,7 +81,7 @@ class AuthService {
     }
   }
 
-  // --- RESTORED & UPDATED AUXILIARY METHODS ---
+  // AUXILIARY METHODS
 
   Future<AuthResult> sendPasswordResetEmail(String email) async {
     try {

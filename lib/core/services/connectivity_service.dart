@@ -8,7 +8,7 @@ class ConnectivityService {
 
   bool get isOnline => _isOnline;
 
-  // CORRECTED: Stream now emits a single ConnectivityResult, not a List.
+
   Stream<bool> get connectivityStream => _connectivity.onConnectivityChanged.map((result) {
     final isConnected = result != ConnectivityResult.none;
     _isOnline = isConnected;
@@ -22,7 +22,7 @@ class ConnectivityService {
     return isConnected;
   });
 
-  // CORRECTED: Method now checks a single ConnectivityResult.
+
   Future<bool> checkConnectivity() async {
     try {
       final result = await _connectivity.checkConnectivity();
@@ -42,7 +42,7 @@ class ConnectivityService {
     }
   }
 
-  // CORRECTED: Logic updated to handle a single ConnectivityResult.
+
   Future<String> getConnectionType() async {
     try {
       final result = await _connectivity.checkConnectivity();
@@ -68,7 +68,7 @@ class ConnectivityService {
     }
   }
 
-  // CORRECTED: Logic updated for the new single-result API.
+
   Future<Map<String, dynamic>> getConnectivityInfo() async {
     try {
       final result = await _connectivity.checkConnectivity();

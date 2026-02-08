@@ -117,7 +117,7 @@ class AppTheme {
         ),
       ),
 
-      // Change 'CardTheme' to 'CardThemeData'
+
       cardTheme: CardThemeData(
         color: AppColors.surfaceGlass,
         elevation: 0,
@@ -134,13 +134,6 @@ class AppTheme {
 
     );
   }
-
-
-
-
-
-
-
 
 
   static ThemeData get lightTheme {

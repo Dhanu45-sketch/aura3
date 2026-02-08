@@ -5,7 +5,6 @@ import 'package:geocoding/geocoding.dart';
 import 'package:flutter/foundation.dart';
 
 class WeatherService {
-  // Get a free API key from: https://openweathermap.org/api
   static const String _apiKey = '165c6c43cac91e6c806795bf80033a02';
   static const String _baseUrl = 'https://api.openweathermap.org/data/2.5';
 

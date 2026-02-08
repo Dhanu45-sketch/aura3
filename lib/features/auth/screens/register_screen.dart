@@ -1,4 +1,3 @@
-// lib/features/auth/screens/register_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
@@ -115,7 +114,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               return Stack(
                 children: [
-                  // RESPONSIVE: Different layouts
+                  // RESPONSIVE
                   isLandscape
                       ? _buildLandscapeLayout()
                       : _buildPortraitLayout(),
@@ -144,7 +143,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // PORTRAIT: Vertical layout
+  // PORTRAIT
   Widget _buildPortraitLayout() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -172,7 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // LANDSCAPE: Two-column layout with scrollable form
+  // LANDSCAPE
   Widget _buildLandscapeLayout() {
     final screenHeight = MediaQuery.of(context).size.height;
     final maxScrollHeight = screenHeight * 0.7;

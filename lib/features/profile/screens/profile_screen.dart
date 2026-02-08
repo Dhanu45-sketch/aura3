@@ -50,7 +50,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // PORTRAIT: Single column (original layout)
+  // PORTRAIT
   Widget _buildPortraitLayout(
       BuildContext context,
       dynamic user,
@@ -74,7 +74,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // LANDSCAPE: Two-column layout for better space usage
+  // LANDSCAPE
   Widget _buildLandscapeLayout(
       BuildContext context,
       dynamic user,
@@ -102,7 +102,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              // RIGHT COLUMN: Settings & Account (Scrollable)
+              // RIGHT COLUMN: Settings & Account
               Expanded(
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
@@ -209,6 +209,7 @@ class ProfileScreen extends StatelessWidget {
             icon: const Icon(Icons.edit_rounded, size: 18),
             label: const Text('Edit Profile'),
             style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
               backgroundColor: AppColors.primaryGlass,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
@@ -286,8 +287,6 @@ class ProfileScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _buildThemeSelector(context, prefsProvider),
-        // REMOVED: Auto Play toggle (not functional)
-        // REMOVED: Notifications toggle (not functional)
       ],
     ).animate().fadeIn(delay: 300.ms, duration: 600.ms);
   }
@@ -409,7 +408,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        // REMOVED: Help & Support (not functional)
+
         _buildSettingItem(
           context,
           Icons.info_rounded,

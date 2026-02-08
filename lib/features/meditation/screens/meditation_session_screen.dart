@@ -62,7 +62,7 @@ class MeditationSessionScreen extends StatelessWidget {
                       ]),
                     ),
                   ),
-                  // RESPONSIVE: Grid or List based on orientation
+                  // RESPONSIVE
                   _buildResponsiveSessionCards(
                     context,
                     completedDay,
@@ -81,7 +81,7 @@ class MeditationSessionScreen extends StatelessWidget {
     );
   }
 
-  // RESPONSIVE: Build grid for landscape, list for portrait
+  // RESPONSIVE
   Widget _buildResponsiveSessionCards(
       BuildContext context,
       int completedDay,
@@ -89,7 +89,7 @@ class MeditationSessionScreen extends StatelessWidget {
       bool isLandscape,
       ) {
     if (isLandscape) {
-      // LANDSCAPE: 2-column grid
+      // LANDSCAPE
       return SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         sliver: SliverGrid(
@@ -114,7 +114,7 @@ class MeditationSessionScreen extends StatelessWidget {
         ),
       );
     } else {
-      // PORTRAIT: Single column list
+      // PORTRAIT
       return SliverPadding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         sliver: SliverList(

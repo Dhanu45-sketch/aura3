@@ -12,7 +12,7 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
-  # Firebase (UPDATED to a compatible set of modern versions)
+  # Firebase
   firebase_core: ^2.32.0
   firebase_auth: ^4.20.0
   firebase_storage: ^11.7.7
@@ -27,13 +27,13 @@ dependencies:
   path_provider: ^2.1.3
   path: ^1.9.0
 
-  # Camera & Images (UPDATED image_cropper to a modern version)
+  # Camera & Images
   image_picker: ^1.1.2
   image_cropper: ^7.0.5
   cached_network_image: ^3.3.1
   geolocator: ^11.0.0
   geocoding: ^3.0.0  # Convert coordinates to city names
-  weather: ^3.1.1    # Weather API wrapper (or use http directly)
+  weather: ^3.1.1    # Weather API wrapper
 
   # Sensors
   sensors_plus: ^5.0.1
@@ -68,17 +68,10 @@ dev_dependencies:
   test: ^1.24.9                # Core testing package
 
   # Additional testing utilities
-  bloc_test: ^9.1.6            # If using BLoC pattern
-  golden_toolkit: ^0.15.0      # For golden/screenshot tests
-  network_image_mock: ^2.1.1   # Mock network images
-  path_provider_platform_interface: ^2.1.1  # Mock path provider
-
-# After adding these, run:
-# flutter pub get
-# flutter pub run build_runner build
-
-# Then generate mocks with:
-# flutter pub run build_runner build --delete-conflicting-outputs
+  bloc_test: ^9.1.6
+  golden_toolkit: ^0.15.0
+  network_image_mock: ^2.1.1
+  path_provider_platform_interface: ^2.1.1
 
 flutter:
   uses-material-design: true
@@ -99,5 +92,3 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/images/aura_logo.png"
 
-  #adaptive_icon_background: "#0F172A"
-  #adaptive_icon_foreground: "assets/images/aura_logo.png"

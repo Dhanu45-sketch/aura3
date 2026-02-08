@@ -149,12 +149,12 @@ class PlaylistProvider extends ChangeNotifier {
     }
   }
 
-  // Add to favorites (convenience method)
+  // Add to favorites
   Future<bool> addToFavorites(String soundId) async {
     return await addSoundToPlaylist('favorites', soundId);
   }
 
-  // Remove from favorites (convenience method)
+  // Remove from favorites
   Future<bool> removeFromFavorites(String soundId) async {
     return await removeSoundFromPlaylist('favorites', soundId);
   }
@@ -165,12 +165,12 @@ class PlaylistProvider extends ChangeNotifier {
     return favorites?.contains(soundId) ?? false;
   }
 
-  // Add to downloads (convenience method)
+  // Add to downloads
   Future<bool> addToDownloads(String soundId) async {
     return await addSoundToPlaylist('downloads', soundId);
   }
 
-  // Remove from downloads (convenience method)
+  // Remove from downloads
   Future<bool> removeFromDownloads(String soundId) async {
     return await removeSoundFromPlaylist('downloads', soundId);
   }

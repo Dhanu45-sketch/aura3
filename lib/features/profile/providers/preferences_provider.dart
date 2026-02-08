@@ -4,7 +4,7 @@ import '../../../core/services/storage_service.dart';
 import '../../../core/services/image_service.dart';
 
 class PreferencesProvider extends ChangeNotifier {
-  // REVERTED: Using global singletons to restore original app architecture
+
   final StorageService _storage = storageService;
   final ImageService _imageService = imageService;
 
@@ -32,12 +32,12 @@ class PreferencesProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isUploadingImage => _isUploadingImage;
 
-  // REVERTED: Constructor no longer takes services as arguments
+
   PreferencesProvider() {
     _loadPreferences();
   }
 
-  // CORRECTED: Made method async and added await to all calls
+
   Future<void> _loadPreferences() async {
     _isLoading = true;
     notifyListeners();
@@ -119,7 +119,6 @@ class PreferencesProvider extends ChangeNotifier {
     try {
       await _storage.addListeningSession(soundId, durationSeconds);
       _totalListeningTime += durationSeconds;
-      // CORRECTED: Added await for the async call
       _streak = await _storage.getStreak();
       notifyListeners();
     } catch (e) {
@@ -151,7 +150,6 @@ class PreferencesProvider extends ChangeNotifier {
     }
   }
 
-  // CORRECTED: Added await
   Future<void> reload() async {
     await _loadPreferences();
   }

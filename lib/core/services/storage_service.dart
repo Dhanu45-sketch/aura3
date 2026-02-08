@@ -120,16 +120,13 @@ class StorageService {
 
     await prefs.setString(_listeningHistoryKey, json.encode(history));
 
-    // Update total listening time
     await _updateTotalListeningTime(durationSeconds);
 
-    // Update streak
     await _updateStreak();
 
     return true;
   }
 
-  // ========== STATISTICS ==========
 
   Future<int> getTotalListeningTime() async {
     final prefs = await _instance;

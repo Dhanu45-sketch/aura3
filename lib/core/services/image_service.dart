@@ -79,5 +79,5 @@ class ImageService {
   }
 }
 
-// REVERTED: Restoring the global singleton instance
+
 final imageService = ImageService();

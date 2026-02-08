@@ -121,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               return Stack(
                 children: [
-                  // RESPONSIVE: Different layouts for landscape/portrait
+                  // RESPONSIVE:landscape/portrait
                   isLandscape
                       ? _buildLandscapeLayout()
                       : _buildPortraitLayout(),
@@ -150,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // PORTRAIT: Vertical layout (original)
+  // PORTRAIT
   Widget _buildPortraitLayout() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -168,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // LANDSCAPE: Horizontal two-column layout
+  // LANDSCAPE
   Widget _buildLandscapeLayout() {
     final screenHeight = MediaQuery.of(context).size.height;
     final maxScrollHeight = screenHeight * 0.7;
@@ -181,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: _buildLogo(),
           ),
         ),
-        // RIGHT: Form section (scrollable)
+        // RIGHT: Form section
         Expanded(
           child: ConstrainedBox(
             constraints: BoxConstraints(

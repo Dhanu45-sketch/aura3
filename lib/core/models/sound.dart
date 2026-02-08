@@ -8,9 +8,9 @@ class Sound {
   final String? localAssetPath; // For bundled sounds
   final String thumbnailUrl;
   final bool isPremium;
-  final List<String> tags; // NEW: tags for categorization
-  final String? fileSize; // NEW: display file size
-  final String? format; // NEW: audio format (MP3, WAV, etc.)
+  final List<String> tags; // tags for categorization
+  final String? fileSize; // display file size
+  final String? format; // audio format
 
   Sound({
     required this.id,

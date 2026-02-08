@@ -46,7 +46,7 @@ class AudioProvider extends ChangeNotifier {
   Future<void> _initialize() async {
     await _audioService.initialize();
     
-    // FIXED: Listen for track completion to play the next track automatically
+    // Listen for track completion to play the next track automatically
     _playerStateSubscription = _audioService.playerStateStream.listen((state) {
       if (state.processingState == ProcessingState.completed) {
         playNext();

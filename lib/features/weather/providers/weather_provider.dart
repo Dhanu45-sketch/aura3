@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:geolocator/geolocator.dart';
 import '../services/weather_service.dart';
 import '../models/weather_data.dart';
 import '../../../core/services/connectivity_service.dart';

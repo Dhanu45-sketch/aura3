@@ -6,8 +6,7 @@ import '../models/sound.dart';
 import 'connectivity_service.dart';
 
 class SoundService {
-  // IMPORTANT: Change this to your actual GitHub raw URL after you upload sounds.json
-  // Example: 'https://raw.githubusercontent.com/yourusername/yourrepo/main/sounds.json'
+
   static const String externalJsonUrl =
       'https://raw.githubusercontent.com/Dhanu45-sketch/aura3/main/assets/data/sounds.json';
 

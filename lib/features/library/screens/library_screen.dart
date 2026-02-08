@@ -307,11 +307,11 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
       );
     }
 
-    // NEW: Check orientation
+    // Check orientation
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     if (isLandscape) {
-      // NEW: LANDSCAPE - 2-column grid
+      // LANDSCAPE
       return GridView.builder(
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -326,7 +326,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
         },
       );
     } else {
-      // ORIGINAL: PORTRAIT - Single column list
+      // PORTRAIT
       return ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: filteredSounds.length,
@@ -383,7 +383,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
             playlistId = null;
         }
 
-        // IMPORTANT: If searching, use filtered list as playlist
+        // If searching, use filtered list as playlist
         final actualPlaylist = _searchQuery.isNotEmpty ? filteredSounds : fullPlaylist;
 
         // Find the index in the actual playlist
@@ -508,7 +508,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                           ],
                         ),
                       ),
-                      // Downloaded badge (icon only)
+                      // Downloaded badge
                       Consumer<DownloadProvider>(
                         builder: (context, downloadProvider, _) {
                           final isDownloaded = downloadProvider.isDownloaded(sound.id);
