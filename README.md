@@ -362,13 +362,13 @@ See [Issues](https://github.com/Dhanu45-sketch/aura3/issues) for a complete list
 
 ## 👥 Authors
 
-- **Your Name** - *Initial work* - [Dhanu45-sketch](https://github.com/Dhanu45-sketch)
+- **Dhanushka Sachintha** - *Initial work* - [Dhanu45-sketch](https://github.com/Dhanu45-sketch)
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **[Ms.Valuka Wijayagunawardene]** – For guidance, feedback, and support throughout the project development
+- **Ms.Valuka Wijayagunawardene** – For guidance, feedback, and support throughout the project development
 - **OpenWeatherMap**: Weather data API
 - **Sound Credits**: Thanks to all the creators on Freesound.org
 - **Icons**: Lucide Icons & Material Design Icons
