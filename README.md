@@ -24,12 +24,11 @@ Aura 3 is a beautifully designed ASMR and meditation app built with Flutter, fea
 
 - 🎨 **Liquid Glass Design** - Modern glassmorphism UI with smooth animations
 - 🌍 **Elemental Soundscapes** - Curated sounds across Earth, Fire, Water, and Wind
-- 🌤️ **Weather Ambience** - AI-powered sound recommendations based on your local weather
+- 🌤️ **Weather Ambience** - Sound recommendations based on your local weather
 - 🧘 **Guided Meditation** - Multi-day meditation programs for all levels
 - 📱 **Shake to Skip** - Intuitive gesture controls using device sensors
 - 💾 **Offline Playback** - Download sounds for offline listening
 - 🔥 **Firebase Integration** - Cloud-based storage and authentication
-- 📊 **Progress Tracking** - Monitor your meditation journey and listening stats
 
 ---
 
@@ -65,13 +64,6 @@ Aura 3 is a beautifully designed ASMR and meditation app built with Flutter, fea
 - **Favorites System** - Quick access to your preferred sounds
 - **Responsive Design** - Optimized for both portrait and landscape modes
 
-### 📊 Statistics & Tracking
-- **Listening Time** - Track total meditation hours
-- **Daily Streaks** - Maintain your meditation consistency
-- **Recently Played** - Quick access to recent sounds
-- **Download Stats** - Monitor offline storage usage
-
----
 
 ## 🖼️ Screenshots
 
@@ -219,7 +211,7 @@ lib/
 The app uses OpenWeatherMap API for weather data. The API key is currently hardcoded in:
 ```dart
 // lib/features/weather/services/weather_service.dart
-static const String _apiKey = 'YOUR_API_KEY';
+static const String _apiKey = 'ENTER_YOUR_API_KEY';
 ```
 
 **To get your own API key:**
@@ -267,7 +259,7 @@ Edit `assets/data/meditation_programs.json` to add new meditation programs.
 4. **Play Audio** - Tap any sound to start playing
 5. **Download for Offline** - Download sounds to play without internet
 6. **Start Meditation** - Choose a meditation program and begin your journey
-7. **Track Progress** - View your stats in the Profile section
+
 
 ### Weather Ambience Feature
 
@@ -362,27 +354,21 @@ See [Issues](https://github.com/Dhanu45-sketch/aura3/issues) for a complete list
 - 🧘 Added meditation programs with progress tracking
 - 📥 Offline download manager
 - 📱 Shake to skip feature using accelerometer
-- 📊 Statistics and progress tracking
 - 🎨 Responsive design for landscape/portrait modes
 - 🔐 Google Sign-In authentication
 - 💾 Smart local/cloud audio playback switching
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## 👥 Authors
 
-- **Your Name** - *Initial work* - [YourGitHub](https://github.com/Dhanu45-sketch)
+- **Your Name** - *Initial work* - [Dhanu45-sketch](https://github.com/Dhanu45-sketch)
 
 ---
 
 ## 🙏 Acknowledgments
 
+- **[Ms.Valuka Wijayagunawardene]** – For guidance, feedback, and support throughout the project development
 - **OpenWeatherMap**: Weather data API
 - **Sound Credits**: Thanks to all the creators on Freesound.org
 - **Icons**: Lucide Icons & Material Design Icons
